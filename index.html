@@ -1,0 +1,1360 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Self-Modifying Web Agent Harness</title>
+  <style>
+    :root {
+      color-scheme: dark;
+      --bg: #0b0f17;
+      --bg-soft: #141b27;
+      --panel: rgba(18, 24, 35, 0.94);
+      --panel-2: rgba(11, 15, 23, 0.96);
+      --line: rgba(162, 184, 214, 0.18);
+      --line-strong: rgba(125, 211, 252, 0.3);
+      --text: #e8eefb;
+      --muted: #92a0bb;
+      --accent: #55d0ff;
+      --accent-2: #61f0c2;
+      --danger: #ff7979;
+      --warning: #ffcc66;
+      --shadow: 0 18px 38px rgba(0, 0, 0, 0.34);
+      --radius: 18px;
+      --mono: "SFMono-Regular", Consolas, "Liberation Mono", Menlo, monospace;
+      --sans: "Inter", "Segoe UI", Arial, sans-serif;
+    }
+
+    * {
+      box-sizing: border-box;
+    }
+
+    html,
+    body {
+      margin: 0;
+      min-height: 100%;
+      background:
+        radial-gradient(circle at top left, rgba(85, 208, 255, 0.12), transparent 30%),
+        radial-gradient(circle at top right, rgba(97, 240, 194, 0.08), transparent 24%),
+        linear-gradient(180deg, #09111a 0%, #05070b 100%);
+      color: var(--text);
+      font-family: var(--sans);
+    }
+
+    body {
+      display: grid;
+      grid-template-columns: minmax(320px, 380px) minmax(0, 1fr);
+      gap: 20px;
+      padding: 20px;
+    }
+
+    #agent-control {
+      position: sticky;
+      top: 20px;
+      align-self: start;
+      height: calc(100vh - 40px);
+      display: flex;
+      flex-direction: column;
+      gap: 16px;
+      padding: 18px;
+      border: 1px solid var(--line);
+      border-radius: 24px;
+      background:
+        linear-gradient(180deg, rgba(29, 39, 57, 0.97), rgba(12, 17, 26, 0.98));
+      box-shadow: var(--shadow);
+      overflow: hidden;
+      backdrop-filter: blur(18px);
+    }
+
+    .control-header {
+      display: grid;
+      gap: 8px;
+    }
+
+    .eyebrow {
+      display: inline-flex;
+      width: fit-content;
+      align-items: center;
+      gap: 8px;
+      padding: 6px 10px;
+      border: 1px solid rgba(97, 240, 194, 0.2);
+      border-radius: 999px;
+      background: rgba(97, 240, 194, 0.08);
+      color: var(--accent-2);
+      font-size: 12px;
+      letter-spacing: 0.08em;
+      text-transform: uppercase;
+    }
+
+    .control-header h1 {
+      margin: 0;
+      font-size: 24px;
+      line-height: 1.1;
+    }
+
+    .control-header p {
+      margin: 0;
+      color: var(--muted);
+      line-height: 1.5;
+    }
+
+    .status-row {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      gap: 12px;
+      padding: 12px 14px;
+      border: 1px solid var(--line);
+      border-radius: 16px;
+      background: rgba(255, 255, 255, 0.02);
+    }
+
+    .status-label {
+      color: var(--muted);
+      font-size: 13px;
+    }
+
+    .status-pill {
+      padding: 6px 10px;
+      border-radius: 999px;
+      background: rgba(85, 208, 255, 0.12);
+      color: var(--accent);
+      font-size: 12px;
+      font-weight: 600;
+      text-transform: uppercase;
+      letter-spacing: 0.04em;
+    }
+
+    .status-pill.running {
+      background: rgba(97, 240, 194, 0.14);
+      color: var(--accent-2);
+    }
+
+    .status-pill.error,
+    .status-pill.interrupted {
+      background: rgba(255, 121, 121, 0.14);
+      color: #ffb0b0;
+    }
+
+    .field-grid {
+      display: grid;
+      gap: 14px;
+    }
+
+    .field {
+      display: grid;
+      gap: 8px;
+    }
+
+    label {
+      font-size: 13px;
+      font-weight: 600;
+      color: #c8d5ef;
+    }
+
+    input,
+    textarea,
+    button {
+      font: inherit;
+    }
+
+    input,
+    textarea {
+      width: 100%;
+      padding: 12px 14px;
+      border: 1px solid rgba(162, 184, 214, 0.18);
+      border-radius: 14px;
+      background: rgba(6, 9, 14, 0.72);
+      color: var(--text);
+      transition: border-color 0.2s ease, box-shadow 0.2s ease, transform 0.2s ease;
+    }
+
+    input:focus,
+    textarea:focus {
+      outline: none;
+      border-color: var(--line-strong);
+      box-shadow: 0 0 0 4px rgba(85, 208, 255, 0.08);
+    }
+
+    textarea {
+      min-height: 130px;
+      resize: vertical;
+      line-height: 1.5;
+    }
+
+    .button-row {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 10px;
+    }
+
+    button {
+      border: 0;
+      border-radius: 14px;
+      padding: 12px 14px;
+      font-weight: 700;
+      cursor: pointer;
+      transition: transform 0.18s ease, opacity 0.18s ease, box-shadow 0.18s ease;
+    }
+
+    button:hover:not(:disabled) {
+      transform: translateY(-1px);
+    }
+
+    button:disabled {
+      cursor: not-allowed;
+      opacity: 0.5;
+    }
+
+    #submit-button {
+      background: linear-gradient(135deg, #55d0ff 0%, #4f7cff 100%);
+      color: #081019;
+      box-shadow: 0 12px 24px rgba(79, 124, 255, 0.28);
+    }
+
+    #stop-button {
+      background: linear-gradient(135deg, rgba(255, 121, 121, 0.95), rgba(219, 74, 74, 0.95));
+      color: white;
+      box-shadow: 0 12px 24px rgba(219, 74, 74, 0.24);
+    }
+
+    .log-panel {
+      min-height: 0;
+      display: flex;
+      flex-direction: column;
+      padding: 14px;
+      border: 1px solid var(--line);
+      border-radius: 18px;
+      background: rgba(0, 0, 0, 0.22);
+      overflow: hidden;
+    }
+
+    .log-panel-header {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      gap: 12px;
+      margin-bottom: 12px;
+    }
+
+    .log-panel h2 {
+      margin: 0;
+      font-size: 15px;
+    }
+
+    .log-panel span {
+      color: var(--muted);
+      font-size: 12px;
+    }
+
+    #output-log {
+      flex: 1;
+      min-height: 180px;
+      overflow: auto;
+      padding-right: 6px;
+      display: grid;
+      gap: 10px;
+    }
+
+    .log-entry {
+      padding: 12px 14px;
+      border-radius: 14px;
+      border: 1px solid rgba(255, 255, 255, 0.07);
+      background: rgba(255, 255, 255, 0.03);
+      display: grid;
+      gap: 8px;
+    }
+
+    .log-entry.user {
+      border-color: rgba(85, 208, 255, 0.2);
+      background: rgba(85, 208, 255, 0.08);
+    }
+
+    .log-entry.assistant {
+      border-color: rgba(97, 240, 194, 0.18);
+      background: rgba(97, 240, 194, 0.08);
+    }
+
+    .log-entry.tool {
+      border-color: rgba(255, 204, 102, 0.2);
+      background: rgba(255, 204, 102, 0.08);
+    }
+
+    .log-entry.error {
+      border-color: rgba(255, 121, 121, 0.25);
+      background: rgba(255, 121, 121, 0.09);
+    }
+
+    .log-entry.status {
+      border-color: rgba(255, 255, 255, 0.09);
+      background: rgba(255, 255, 255, 0.04);
+    }
+
+    .log-topline {
+      display: flex;
+      justify-content: space-between;
+      align-items: baseline;
+      gap: 10px;
+    }
+
+    .log-kind {
+      font-size: 12px;
+      font-weight: 700;
+      letter-spacing: 0.05em;
+      text-transform: uppercase;
+    }
+
+    .log-time {
+      color: var(--muted);
+      font-size: 11px;
+      white-space: nowrap;
+    }
+
+    .log-content,
+    .log-content pre {
+      margin: 0;
+      white-space: pre-wrap;
+      word-break: break-word;
+      line-height: 1.45;
+      font-family: inherit;
+      font-size: 14px;
+    }
+
+    .tool-details {
+      border: 1px solid rgba(255, 255, 255, 0.08);
+      border-radius: 12px;
+      background: rgba(0, 0, 0, 0.18);
+      overflow: hidden;
+    }
+
+    .tool-details summary {
+      cursor: pointer;
+      list-style: none;
+      padding: 10px 12px;
+      font-family: var(--mono);
+      font-size: 12px;
+    }
+
+    .tool-details summary::-webkit-details-marker {
+      display: none;
+    }
+
+    .tool-details pre {
+      margin: 0;
+      padding: 0 12px 12px;
+      color: #d9e2f5;
+      font-family: var(--mono);
+      font-size: 12px;
+      line-height: 1.5;
+      white-space: pre-wrap;
+      word-break: break-word;
+    }
+
+    #agent-world {
+      min-width: 0;
+      min-height: calc(100vh - 40px);
+      border: 1px solid rgba(255, 255, 255, 0.08);
+      border-radius: 24px;
+      background:
+        linear-gradient(180deg, rgba(255, 255, 255, 0.9), rgba(243, 246, 255, 0.96));
+      overflow: hidden;
+      box-shadow: var(--shadow);
+    }
+
+    @media (max-width: 980px) {
+      body {
+        grid-template-columns: 1fr;
+      }
+
+      #agent-control {
+        position: static;
+        height: auto;
+      }
+
+      #agent-world {
+        min-height: 60vh;
+      }
+    }
+  </style>
+</head>
+<body>
+  <div id="agent-control">
+    <div class="control-header">
+      <div class="eyebrow">Protected Control Plane</div>
+      <h1>Self-Modifying Web Agent</h1>
+      <p>Enter an API key, describe the change you want, and let the model update only the mutable world pane.</p>
+    </div>
+
+    <div class="status-row">
+      <div>
+        <div class="status-label">Runtime status</div>
+      </div>
+      <div class="status-pill idle" id="runtime-status">Idle</div>
+    </div>
+
+    <div class="field-grid">
+      <div class="field">
+        <label for="api-key">API Key</label>
+        <input id="api-key" type="password" placeholder="Enter API Key" autocomplete="off">
+      </div>
+
+      <div class="field">
+        <label for="model-select">Model</label>
+        <input id="model-select" type="text" value="gpt-4o-mini" spellcheck="false" autocomplete="off">
+      </div>
+
+      <div class="field">
+        <label for="prompt-input">Prompt</label>
+        <textarea id="prompt-input" placeholder="Example: Turn the page into a fake pizza fan profile with animated stickers."></textarea>
+      </div>
+
+      <div class="button-row">
+        <button id="submit-button" type="button">Run Agent</button>
+        <button id="stop-button" type="button">Stop</button>
+      </div>
+    </div>
+
+    <div class="log-panel">
+      <div class="log-panel-header">
+        <h2>Output Log</h2>
+        <span>Messages, tools, guardrails, errors</span>
+      </div>
+      <div id="output-log" aria-live="polite"></div>
+    </div>
+  </div>
+
+  <div id="agent-world">
+    <style data-agent-style="active">
+      #agent-world {
+        color: #111;
+      }
+
+      #agent-world .retro-page {
+        min-height: 100%;
+        padding: 18px;
+        background:
+          linear-gradient(180deg, #72cbff 0%, #d9f1ff 18%, #ffe6fb 68%, #fff7c0 100%);
+        font-family: Verdana, Tahoma, sans-serif;
+      }
+
+      #agent-world .retro-shell {
+        max-width: 1040px;
+        margin: 0 auto;
+        border: 4px ridge #f8f8f8;
+        background: #ffffff;
+        box-shadow: 0 0 0 4px #4f74d9, 0 0 22px rgba(58, 49, 123, 0.35);
+      }
+
+      #agent-world .retro-banner {
+        padding: 16px 18px;
+        color: #fff;
+        background:
+          linear-gradient(90deg, #ff5db8 0%, #7348ff 40%, #27b3ff 100%);
+        border-bottom: 4px solid #ffef7a;
+      }
+
+      #agent-world .retro-banner h2,
+      #agent-world .retro-banner p {
+        margin: 0;
+      }
+
+      #agent-world .retro-banner h2 {
+        font-size: 28px;
+        text-shadow: 2px 2px 0 #4a178d;
+      }
+
+      #agent-world .retro-banner p {
+        margin-top: 8px;
+        font-size: 13px;
+      }
+
+      #agent-world .retro-grid {
+        display: grid;
+        grid-template-columns: 280px minmax(0, 1fr);
+        gap: 16px;
+        padding: 16px;
+      }
+
+      #agent-world .retro-card {
+        border: 3px solid #244db7;
+        background: #fdfdfd;
+      }
+
+      #agent-world .retro-card h3 {
+        margin: 0;
+        padding: 8px 10px;
+        font-size: 14px;
+        color: #fff;
+        background:
+          linear-gradient(180deg, #3c7cff 0%, #0b43b6 100%);
+        text-transform: uppercase;
+        letter-spacing: 0.05em;
+      }
+
+      #agent-world .retro-card-body {
+        padding: 12px;
+      }
+
+      #agent-world .profile-box {
+        display: grid;
+        grid-template-columns: 92px minmax(0, 1fr);
+        gap: 12px;
+        align-items: center;
+      }
+
+      #agent-world .avatar {
+        width: 92px;
+        height: 92px;
+        border: 4px ridge #ffd84f;
+        background:
+          radial-gradient(circle at 35% 30%, #fff6a6 0%, #f6a500 40%, #ea4ca5 100%);
+        display: grid;
+        place-items: center;
+        color: white;
+        font-weight: bold;
+        font-size: 12px;
+        text-align: center;
+      }
+
+      #agent-world .tagline {
+        margin: 6px 0 0;
+        color: #a11f76;
+        font-weight: bold;
+      }
+
+      #agent-world .blink {
+        animation: retroBlink 1.2s step-end infinite;
+        color: #d31717;
+      }
+
+      @keyframes retroBlink {
+        50% {
+          opacity: 0.2;
+        }
+      }
+
+      #agent-world .stats {
+        margin-top: 10px;
+        padding: 8px;
+        border: 2px dashed #ff59a8;
+        background: #fff4fb;
+        font-size: 13px;
+      }
+
+      #agent-world .friends-list {
+        display: grid;
+        grid-template-columns: repeat(2, minmax(0, 1fr));
+        gap: 10px;
+      }
+
+      #agent-world .friend {
+        padding: 8px;
+        border: 2px solid #ffd84f;
+        background: #fff9d5;
+        text-align: center;
+        font-size: 12px;
+      }
+
+      #agent-world .friend-avatar {
+        width: 48px;
+        height: 48px;
+        margin: 0 auto 6px;
+        border: 2px solid #2d44b4;
+        background:
+          linear-gradient(135deg, #8ef0ff 0%, #ff7dd0 100%);
+      }
+
+      #agent-world .music-player {
+        display: grid;
+        gap: 10px;
+        color: #172343;
+      }
+
+      #agent-world .track {
+        padding: 10px;
+        border: 2px inset #d9e2ff;
+        background: #eef3ff;
+      }
+
+      #agent-world .player-controls {
+        display: flex;
+        gap: 8px;
+      }
+
+      #agent-world .player-controls button {
+        flex: 1;
+        padding: 8px 10px;
+        border: 2px outset #fff;
+        background: linear-gradient(180deg, #fefefe 0%, #c4d4ff 100%);
+        color: #10224b;
+        font-weight: bold;
+      }
+
+      #agent-world .about-copy {
+        line-height: 1.6;
+        font-size: 14px;
+      }
+
+      #agent-world .hero-box {
+        border: 3px dashed #ff7dd0;
+        padding: 12px;
+        background: #fff0fa;
+        margin-bottom: 14px;
+      }
+
+      #agent-world .stamp-row {
+        display: flex;
+        gap: 10px;
+        flex-wrap: wrap;
+        margin-top: 14px;
+      }
+
+      #agent-world .stamp {
+        padding: 8px 10px;
+        border: 2px solid #0b43b6;
+        background: linear-gradient(180deg, #fff 0%, #dfe8ff 100%);
+        font-size: 12px;
+        font-weight: bold;
+        color: #b0127e;
+      }
+
+      @media (max-width: 860px) {
+        #agent-world .retro-grid {
+          grid-template-columns: 1fr;
+        }
+      }
+    </style>
+
+    <div class="retro-page">
+      <div class="retro-shell">
+        <div class="retro-banner">
+          <h2>xX_AgentMaster_Xx</h2>
+          <p>Currently tuned to chrome dreams, glitter GIFs, and suspiciously loud AIM away messages.</p>
+        </div>
+
+        <div class="retro-grid">
+          <div class="retro-column">
+            <section class="retro-card">
+              <h3>Profile</h3>
+              <div class="retro-card-body">
+                <div class="profile-box">
+                  <div class="avatar">BEST<br>PROFILE<br>2004</div>
+                  <div>
+                    <strong>xX_AgentMaster_Xx</strong>
+                    <p class="tagline">"coding in glitter fonts since forever"</p>
+                    <p><span class="blink">Online Now!</span></p>
+                  </div>
+                </div>
+                <div class="stats">
+                  Mood: cyber-sentimental<br>
+                  Status: tweaking my page again<br>
+                  Last login: 11:11 PM
+                </div>
+              </div>
+            </section>
+
+            <section class="retro-card" style="margin-top: 16px;">
+              <h3>Top Friends</h3>
+              <div class="retro-card-body">
+                <div class="friends-list">
+                  <div class="friend"><div class="friend-avatar"></div>GlitterGhoul</div>
+                  <div class="friend"><div class="friend-avatar"></div>ByteBabe</div>
+                  <div class="friend"><div class="friend-avatar"></div>NeonHamster</div>
+                  <div class="friend"><div class="friend-avatar"></div>SceneMachine</div>
+                  <div class="friend"><div class="friend-avatar"></div>PixelCrush</div>
+                  <div class="friend"><div class="friend-avatar"></div>Y2KWizard</div>
+                </div>
+              </div>
+            </section>
+          </div>
+
+          <div class="retro-column">
+            <section class="retro-card">
+              <h3>About Me</h3>
+              <div class="retro-card-body">
+                <div class="hero-box">
+                  Welcome 2 my digital kingdom. This page is running on caffeine, chaos, and the deep belief that every profile deserves at least three gradients.
+                </div>
+                <div class="about-copy">
+                  I like collecting fake band buttons, making layouts way too bright, and pretending my profile song is always the song of the summer. If you are here to judge my glitter choices, please sign the guestbook first.
+                </div>
+                <div class="stamp-row">
+                  <div class="stamp">HTML Survivor</div>
+                  <div class="stamp">CSS Chaos Club</div>
+                  <div class="stamp">Best Viewed Loudly</div>
+                </div>
+              </div>
+            </section>
+
+            <section class="retro-card" style="margin-top: 16px;">
+              <h3>Music Player</h3>
+              <div class="retro-card-body">
+                <div class="music-player">
+                  <div class="track">
+                    <strong>Now Pretending To Play:</strong><br>
+                    "Laser Heartbeat (MySpace Cut)" by DJ Away Message
+                  </div>
+                  <div class="player-controls">
+                    <button type="button">Play</button>
+                    <button type="button">Pause</button>
+                    <button type="button">Skip</button>
+                  </div>
+                  <small>Audio not included. Vibes absolutely included.</small>
+                </div>
+              </div>
+            </section>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <script>
+    const SYSTEM_PROMPT = [
+      "You are an agent that modifies a web page via tools.",
+      "You control ONLY the contents of the element with id=\"agent-world\".",
+      "STRICT RULES:",
+      "- Never modify #agent-control unless explicitly requested",
+      "- Never overwrite the full document or body",
+      "- Do not break the system's ability to run",
+      "GUIDELINES:",
+      "- Prefer incremental edits",
+      "- Write valid HTML/CSS/JS",
+      "- Avoid infinite loops",
+      "- You may build tools and UI inside the world",
+      "Your goal is to iteratively improve the page based on user instructions."
+    ].join("\n");
+
+    const TOOL_SCHEMA = [
+      {
+        type: "function",
+        function: {
+          name: "set_world",
+          description: "Replace the entire contents of #agent-world with new HTML, CSS, and optional JavaScript for the mutable world.",
+          parameters: {
+            type: "object",
+            properties: {
+              html: {
+                type: "string",
+                description: "Complete HTML markup for the mutable world area only. Do not include document, html, head, body, or #agent-control."
+              },
+              css: {
+                type: "string",
+                description: "CSS rules scoped to the content inside #agent-world. This is injected into a style element inside the world."
+              },
+              js: {
+                type: "string",
+                description: "Optional JavaScript to enhance only #agent-world behavior. Avoid global mutations and infinite loops."
+              }
+            },
+            required: ["html"],
+            additionalProperties: false
+          }
+        }
+      },
+      {
+        type: "function",
+        function: {
+          name: "append_html",
+          description: "Append new HTML to the existing contents of #agent-world without replacing the full world.",
+          parameters: {
+            type: "object",
+            properties: {
+              html: {
+                type: "string",
+                description: "HTML fragment to append inside #agent-world."
+              }
+            },
+            required: ["html"],
+            additionalProperties: false
+          }
+        }
+      },
+      {
+        type: "function",
+        function: {
+          name: "set_css",
+          description: "Add or replace the active style element inside #agent-world.",
+          parameters: {
+            type: "object",
+            properties: {
+              css: {
+                type: "string",
+                description: "CSS rules that should apply to the current contents of #agent-world."
+              }
+            },
+            required: ["css"],
+            additionalProperties: false
+          }
+        }
+      },
+      {
+        type: "function",
+        function: {
+          name: "run_js",
+          description: "Execute JavaScript to enhance the mutable world without replacing its markup.",
+          parameters: {
+            type: "object",
+            properties: {
+              js: {
+                type: "string",
+                description: "JavaScript that should only operate on content inside #agent-world."
+              }
+            },
+            required: ["js"],
+            additionalProperties: false
+          }
+        }
+      }
+    ];
+
+    let interrupted = false;
+    let isRunning = false;
+    let conversationHistory = [];
+
+    const outputLog = document.getElementById("output-log");
+    const runtimeStatus = document.getElementById("runtime-status");
+    const apiKeyInput = document.getElementById("api-key");
+    const modelInput = document.getElementById("model-select");
+    const promptInput = document.getElementById("prompt-input");
+    const submitButton = document.getElementById("submit-button");
+    const stopButton = document.getElementById("stop-button");
+    const agentWorld = document.getElementById("agent-world");
+
+    function timestamp() {
+      return new Date().toLocaleTimeString([], {
+        hour: "2-digit",
+        minute: "2-digit",
+        second: "2-digit"
+      });
+    }
+
+    function setStatus(label, className) {
+      runtimeStatus.textContent = label;
+      runtimeStatus.className = "status-pill " + className;
+    }
+
+    function scrollLogToBottom() {
+      outputLog.scrollTop = outputLog.scrollHeight;
+    }
+
+    function addLogEntry(kind, content, options = {}) {
+      const entry = document.createElement("div");
+      entry.className = "log-entry " + kind;
+
+      const topline = document.createElement("div");
+      topline.className = "log-topline";
+
+      const label = document.createElement("div");
+      label.className = "log-kind";
+      label.textContent = options.label || kind;
+
+      const time = document.createElement("div");
+      time.className = "log-time";
+      time.textContent = timestamp();
+
+      topline.appendChild(label);
+      topline.appendChild(time);
+      entry.appendChild(topline);
+
+      if (options.summary && options.details) {
+        const details = document.createElement("details");
+        details.className = "tool-details";
+        if (options.open) {
+          details.open = true;
+        }
+
+        const summary = document.createElement("summary");
+        summary.textContent = options.summary;
+        details.appendChild(summary);
+
+        const pre = document.createElement("pre");
+        pre.textContent = options.details;
+        details.appendChild(pre);
+        entry.appendChild(details);
+      }
+
+      if (content) {
+        const body = document.createElement("div");
+        body.className = "log-content";
+        body.textContent = content;
+        entry.appendChild(body);
+      }
+
+      outputLog.appendChild(entry);
+      scrollLogToBottom();
+      return entry;
+    }
+
+    function logToolCall(name, args) {
+      addLogEntry("tool", "Tool dispatched.", {
+        label: "tool call",
+        summary: name,
+        details: safeJSONStringify(args),
+        open: false
+      });
+    }
+
+    function logToolResult(name, result) {
+      addLogEntry("status", result, {
+        label: name + " result"
+      });
+    }
+
+    function safeJSONStringify(value) {
+      try {
+        return JSON.stringify(value, null, 2);
+      } catch (error) {
+        return String(value);
+      }
+    }
+
+    function getWorldStyleElement() {
+      let styleEl = agentWorld.querySelector("style[data-agent-style=\"active\"]");
+      if (!styleEl) {
+        styleEl = document.createElement("style");
+        styleEl.setAttribute("data-agent-style", "active");
+        agentWorld.insertBefore(styleEl, agentWorld.firstChild);
+      }
+      return styleEl;
+    }
+
+    function upsertWorldStyle(css) {
+      const styleEl = getWorldStyleElement();
+      styleEl.textContent = typeof css === "string" ? css : "";
+    }
+
+    function containsForbiddenHtml(html) {
+      return typeof html === "string" && html.toLowerCase().includes("agent-control");
+    }
+
+    function containsForbiddenJs(js) {
+      if (typeof js !== "string" || js.trim() === "") {
+        return false;
+      }
+
+      const forbiddenPatterns = [
+        /document\s*\.\s*body/i,
+        /document\s*\.\s*documentElement/i,
+        /document\s*\.\s*getElementById\s*\(\s*["']agent-control["']\s*\)/i,
+        /document\s*\.\s*querySelector\s*\(\s*["']#agent-control["']\s*\)/i,
+        /(?:window|globalThis)\s*\.\s*(?:fetch|applyTool|callLLM|agentLoop|conversationHistory|interrupted|SYSTEM_PROMPT|TOOL_SCHEMA)\s*=/i,
+        /(?:let|const|var)\s+(?:applyTool|callLLM|agentLoop|conversationHistory|interrupted|SYSTEM_PROMPT|TOOL_SCHEMA)\b/i
+      ];
+
+      return forbiddenPatterns.some((pattern) => pattern.test(js));
+    }
+
+    function validateToolCall(toolName, args) {
+      const html = args && typeof args.html === "string" ? args.html : "";
+      const js = args && typeof args.js === "string" ? args.js : "";
+
+      if (containsForbiddenHtml(html)) {
+        const message = "Forbidden: control plane modification";
+        addLogEntry("error", message, { label: toolName + " rejected" });
+        throw new Error(message);
+      }
+
+      if (containsForbiddenJs(js)) {
+        const message = "Forbidden: unsafe JavaScript reference";
+        addLogEntry("error", message, { label: toolName + " rejected" });
+        throw new Error(message);
+      }
+    }
+
+    function executeWorldJs(js) {
+      if (typeof js !== "string" || js.trim() === "") {
+        return "No JavaScript executed.";
+      }
+
+      try {
+        const runner = new Function("\"use strict\";\n" + js);
+        runner();
+        return "JavaScript executed.";
+      } catch (error) {
+        const message = "World JS error: " + error.message;
+        addLogEntry("error", message, { label: "run_js error" });
+        return message;
+      }
+    }
+
+    function applyTool(call) {
+      if (interrupted) {
+        throw new Error("Interrupted");
+      }
+
+      const toolName = call && call.name ? call.name : "";
+      const args = call && typeof call.args === "object" && call.args !== null ? call.args : {};
+
+      validateToolCall(toolName, args);
+
+      switch (toolName) {
+        case "set_world": {
+          const html = typeof args.html === "string" ? args.html : "";
+          const css = typeof args.css === "string" ? args.css : "";
+          const js = typeof args.js === "string" ? args.js : "";
+          agentWorld.innerHTML = html;
+          upsertWorldStyle(css);
+          const jsResult = executeWorldJs(js);
+          return "World replaced. CSS updated. " + jsResult;
+        }
+        case "append_html": {
+          const html = typeof args.html === "string" ? args.html : "";
+          agentWorld.insertAdjacentHTML("beforeend", html);
+          return "HTML appended.";
+        }
+        case "set_css": {
+          const css = typeof args.css === "string" ? args.css : "";
+          upsertWorldStyle(css);
+          return "CSS updated.";
+        }
+        case "run_js": {
+          const js = typeof args.js === "string" ? args.js : "";
+          return executeWorldJs(js);
+        }
+        default:
+          throw new Error("Unknown tool: " + toolName);
+      }
+    }
+
+    async function callLLM(messages) {
+      const apiKey = apiKeyInput.value.trim();
+      const model = modelInput.value.trim() || "gpt-4o-mini";
+
+      if (!apiKey) {
+        throw new Error("API key is required.");
+      }
+
+      let responseText = "";
+
+      const response = await fetch("https://api.z.ai/api/coding/paas/v4/chat/completions", {
+        method: "POST",
+        headers: {
+          Authorization: "Bearer " + apiKey,
+          "Content-Type": "application/json"
+        },
+        body: JSON.stringify({
+          model: model,
+          messages: [
+            { role: "system", content: SYSTEM_PROMPT },
+            ...messages
+          ],
+          tools: TOOL_SCHEMA,
+          tool_choice: "auto"
+        })
+      });
+
+      responseText = await response.text();
+
+      let data;
+      try {
+        data = JSON.parse(responseText);
+      } catch (error) {
+        return {
+          ok: false,
+          error: "Malformed JSON response from API.",
+          rawText: responseText
+        };
+      }
+
+      if (!response.ok) {
+        return {
+          ok: false,
+          error: (data && data.error && data.error.message) || ("Request failed with status " + response.status + "."),
+          rawText: responseText,
+          payload: data
+        };
+      }
+
+      return {
+        ok: true,
+        payload: data,
+        rawText: responseText
+      };
+    }
+
+    function contentPartsToText(content) {
+      if (typeof content === "string") {
+        return content;
+      }
+
+      if (!Array.isArray(content)) {
+        return "";
+      }
+
+      return content.map((part) => {
+        if (!part || typeof part !== "object") {
+          return "";
+        }
+        if (typeof part.text === "string") {
+          return part.text;
+        }
+        if (part.type === "text" && typeof part.text === "string") {
+          return part.text;
+        }
+        return "";
+      }).filter(Boolean).join("\n");
+    }
+
+    function extractMessageEnvelope(result) {
+      if (!result || !result.payload) {
+        return null;
+      }
+
+      const payload = result.payload;
+      if (payload.choices && payload.choices[0] && payload.choices[0].message) {
+        return payload.choices[0].message;
+      }
+
+      if (payload.message) {
+        return payload.message;
+      }
+
+      return null;
+    }
+
+    function normalizeAssistantReply(result) {
+      const message = extractMessageEnvelope(result);
+      const rawPayload = result && result.payload ? result.payload : null;
+      const rawText = result && result.rawText ? result.rawText : "";
+
+      if (!message) {
+        return {
+          text: rawText || safeJSONStringify(rawPayload),
+          toolCalls: [],
+          rawAssistant: rawText || safeJSONStringify(rawPayload),
+          originalMessage: null
+        };
+      }
+
+      const text = contentPartsToText(message.content);
+      const toolCalls = Array.isArray(message.tool_calls)
+        ? message.tool_calls
+        : Array.isArray(message.toolCalls)
+          ? message.toolCalls
+          : [];
+
+      const normalizedCalls = toolCalls.map((call, index) => {
+        const fn = call && call.function ? call.function : call || {};
+        return {
+          id: call && call.id ? call.id : "tool_" + Date.now() + "_" + index,
+          name: fn.name || call.name || "",
+          rawArgs: fn.arguments !== undefined ? fn.arguments : call.arguments,
+          original: call
+        };
+      });
+
+      return {
+        text: text || "",
+        toolCalls: normalizedCalls,
+        rawAssistant: rawText || safeJSONStringify(rawPayload),
+        originalMessage: message
+      };
+    }
+
+    function parseToolArguments(rawArgs) {
+      if (rawArgs && typeof rawArgs === "object") {
+        return { ok: true, value: rawArgs };
+      }
+
+      if (typeof rawArgs !== "string") {
+        return { ok: true, value: {} };
+      }
+
+      const trimmed = rawArgs.trim();
+      if (!trimmed) {
+        return { ok: true, value: {} };
+      }
+
+      try {
+        return {
+          ok: true,
+          value: JSON.parse(trimmed)
+        };
+      } catch (error) {
+        return {
+          ok: false,
+          error: error.message
+        };
+      }
+    }
+
+    async function agentLoop() {
+      interrupted = false;
+      isRunning = true;
+      submitButton.disabled = true;
+      setStatus("Running", "running");
+      addLogEntry("status", "Agent loop started.", { label: "status" });
+
+      try {
+        while (!interrupted) {
+          const response = await callLLM(conversationHistory);
+
+          if (interrupted) {
+            break;
+          }
+
+          if (!response.ok) {
+            const errorMessage = response.error || "Unknown API error.";
+            addLogEntry("error", errorMessage, { label: "api error" });
+            if (response.rawText) {
+              addLogEntry("assistant", response.rawText, { label: "raw response" });
+            }
+            break;
+          }
+
+          const assistantReply = normalizeAssistantReply(response);
+
+          if (assistantReply.toolCalls.length > 0) {
+            const assistantHistoryEntry = {
+              role: "assistant",
+              content: assistantReply.text || "",
+              tool_calls: assistantReply.originalMessage && Array.isArray(assistantReply.originalMessage.tool_calls)
+                ? assistantReply.originalMessage.tool_calls
+                : assistantReply.toolCalls.map((call) => ({
+                    id: call.id,
+                    type: "function",
+                    function: {
+                      name: call.name,
+                      arguments: typeof call.rawArgs === "string" ? call.rawArgs : safeJSONStringify(call.rawArgs)
+                    }
+                  }))
+            };
+            conversationHistory.push(assistantHistoryEntry);
+
+            if (assistantReply.text) {
+              addLogEntry("assistant", assistantReply.text, { label: "assistant" });
+            }
+
+            let parsedCalls = [];
+            let parseFailed = false;
+
+            for (const call of assistantReply.toolCalls) {
+              const parsed = parseToolArguments(call.rawArgs);
+              if (!parsed.ok || !call.name) {
+                parseFailed = true;
+                addLogEntry("error", "Tool call parsing failed. Falling back to raw response text.", {
+                  label: "parser"
+                });
+                addLogEntry("assistant", assistantReply.rawAssistant, { label: "raw response" });
+                break;
+              }
+              parsedCalls.push({
+                id: call.id,
+                name: call.name,
+                args: parsed.value
+              });
+            }
+
+            if (parseFailed) {
+              break;
+            }
+
+            for (const call of parsedCalls) {
+              if (interrupted) {
+                break;
+              }
+
+              logToolCall(call.name, call.args);
+
+              try {
+                const result = applyTool(call);
+                logToolResult(call.name, result);
+                conversationHistory.push({
+                  role: "tool",
+                  tool_call_id: call.id,
+                  content: safeJSONStringify({
+                    ok: true,
+                    result: result
+                  })
+                });
+              } catch (error) {
+                addLogEntry("error", error.message, { label: call.name + " failed" });
+                conversationHistory.push({
+                  role: "tool",
+                  tool_call_id: call.id,
+                  content: safeJSONStringify({
+                    ok: false,
+                    error: error.message
+                  })
+                });
+              }
+            }
+
+            continue;
+          }
+
+          if (assistantReply.text) {
+            addLogEntry("assistant", assistantReply.text, { label: "assistant" });
+            conversationHistory.push({
+              role: "assistant",
+              content: assistantReply.text
+            });
+            break;
+          }
+
+          addLogEntry("status", "No assistant text or tool call returned. Stopping loop.", { label: "status" });
+          break;
+        }
+      } catch (error) {
+        addLogEntry("error", error.message, { label: "runtime error" });
+      } finally {
+        isRunning = false;
+        submitButton.disabled = false;
+        if (interrupted) {
+          setStatus("Interrupted", "interrupted");
+          addLogEntry("status", "Interrupted.", { label: "status" });
+        } else {
+          setStatus("Idle", "idle");
+          addLogEntry("status", "Agent loop finished.", { label: "status" });
+        }
+      }
+    }
+
+    submitButton.addEventListener("click", async () => {
+      if (isRunning) {
+        addLogEntry("error", "Agent is already running.", { label: "state" });
+        return;
+      }
+
+      const prompt = promptInput.value.trim();
+      if (!prompt) {
+        addLogEntry("error", "Prompt is required.", { label: "validation" });
+        return;
+      }
+
+      interrupted = false;
+      conversationHistory.push({
+        role: "user",
+        content: prompt
+      });
+      addLogEntry("user", prompt, { label: "user" });
+      promptInput.value = "";
+      await agentLoop();
+    });
+
+    stopButton.addEventListener("click", () => {
+      interrupted = true;
+      if (isRunning) {
+        setStatus("Interrupted", "interrupted");
+        addLogEntry("status", "Stop requested. The current loop will halt before the next tool or model step.", {
+          label: "status"
+        });
+      } else {
+        addLogEntry("status", "Stop requested, but no agent loop is running.", { label: "status" });
+      }
+    });
+
+    promptInput.addEventListener("keydown", (event) => {
+      if ((event.metaKey || event.ctrlKey) && event.key === "Enter") {
+        event.preventDefault();
+        submitButton.click();
+      }
+    });
+
+    addLogEntry("status", "Harness ready. The control plane is protected; only #agent-world is mutable.", {
+      label: "status"
+    });
+  </script>
+</body>
+</html>
