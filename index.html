@@ -55,7 +55,7 @@
       height: calc(100vh - 40px);
       display: flex;
       flex-direction: column;
-      gap: 16px;
+      gap: 14px;
       padding: 18px;
       border: 1px solid var(--line);
       border-radius: 24px;
@@ -68,7 +68,34 @@
 
     .control-header {
       display: grid;
-      gap: 8px;
+      gap: 6px;
+    }
+
+    .control-title-row {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+    }
+
+    .control-icon {
+      width: 32px;
+      height: 32px;
+      border-radius: 10px;
+      background: linear-gradient(135deg, #55d0ff 0%, #4f7cff 100%);
+      display: grid;
+      place-items: center;
+      font-size: 16px;
+      flex-shrink: 0;
+    }
+
+    .control-header h1 {
+      margin: 0;
+      font-size: 22px;
+      line-height: 1.1;
+      background: linear-gradient(135deg, #55d0ff, #61f0c2);
+      -webkit-background-clip: text;
+      -webkit-text-fill-color: transparent;
+      background-clip: text;
     }
 
     .eyebrow {
@@ -76,25 +103,20 @@
       width: fit-content;
       align-items: center;
       gap: 8px;
-      padding: 6px 10px;
+      padding: 5px 10px;
       border: 1px solid rgba(97, 240, 194, 0.2);
       border-radius: 999px;
       background: rgba(97, 240, 194, 0.08);
       color: var(--accent-2);
-      font-size: 12px;
+      font-size: 11px;
       letter-spacing: 0.08em;
       text-transform: uppercase;
-    }
-
-    .control-header h1 {
-      margin: 0;
-      font-size: 24px;
-      line-height: 1.1;
     }
 
     .control-header p {
       margin: 0;
       color: var(--muted);
+      font-size: 13px;
       line-height: 1.5;
     }
 
@@ -103,9 +125,9 @@
       justify-content: space-between;
       align-items: center;
       gap: 12px;
-      padding: 12px 14px;
+      padding: 10px 14px;
       border: 1px solid var(--line);
-      border-radius: 16px;
+      border-radius: 14px;
       background: rgba(255, 255, 255, 0.02);
     }
 
@@ -115,11 +137,11 @@
     }
 
     .status-pill {
-      padding: 6px 10px;
+      padding: 5px 10px;
       border-radius: 999px;
       background: rgba(85, 208, 255, 0.12);
       color: var(--accent);
-      font-size: 12px;
+      font-size: 11px;
       font-weight: 600;
       text-transform: uppercase;
       letter-spacing: 0.04em;
@@ -128,6 +150,12 @@
     .status-pill.running {
       background: rgba(97, 240, 194, 0.14);
       color: var(--accent-2);
+      animation: statusPulse 1.5s ease-in-out infinite;
+    }
+
+    @keyframes statusPulse {
+      0%, 100% { box-shadow: 0 0 0 0 rgba(97, 240, 194, 0.3); }
+      50% { box-shadow: 0 0 0 6px rgba(97, 240, 194, 0); }
     }
 
     .status-pill.error,
@@ -136,20 +164,39 @@
       color: #ffb0b0;
     }
 
+    .model-badge {
+      display: inline-flex;
+      align-items: center;
+      gap: 6px;
+      padding: 4px 10px;
+      border: 1px solid rgba(85, 208, 255, 0.15);
+      border-radius: 8px;
+      background: rgba(85, 208, 255, 0.06);
+      font-size: 11px;
+      color: var(--accent);
+      font-family: var(--mono);
+    }
+
+    .model-badge::before {
+      content: "\25C6";
+      font-size: 8px;
+    }
+
     .field-grid {
       display: grid;
-      gap: 14px;
+      gap: 12px;
     }
 
     .field {
       display: grid;
-      gap: 8px;
+      gap: 6px;
     }
 
     label {
-      font-size: 13px;
+      font-size: 12px;
       font-weight: 600;
       color: #c8d5ef;
+      letter-spacing: 0.02em;
     }
 
     input,
@@ -161,23 +208,29 @@
     input,
     textarea {
       width: 100%;
-      padding: 12px 14px;
+      padding: 10px 12px;
       border: 1px solid rgba(162, 184, 214, 0.18);
-      border-radius: 14px;
+      border-radius: 12px;
       background: rgba(6, 9, 14, 0.72);
       color: var(--text);
-      transition: border-color 0.2s ease, box-shadow 0.2s ease, transform 0.2s ease;
+      font-size: 13px;
+      transition: border-color 0.2s ease, box-shadow 0.2s ease;
     }
 
     input:focus,
     textarea:focus {
       outline: none;
       border-color: var(--line-strong);
-      box-shadow: 0 0 0 4px rgba(85, 208, 255, 0.08);
+      box-shadow: 0 0 0 3px rgba(85, 208, 255, 0.08);
+    }
+
+    input:hover:not(:focus),
+    textarea:hover:not(:focus) {
+      border-color: rgba(162, 184, 214, 0.28);
     }
 
     textarea {
-      min-height: 130px;
+      min-height: 100px;
       resize: vertical;
       line-height: 1.5;
     }
@@ -190,41 +243,71 @@
 
     button {
       border: 0;
-      border-radius: 14px;
-      padding: 12px 14px;
+      border-radius: 12px;
+      padding: 10px 14px;
       font-weight: 700;
+      font-size: 13px;
       cursor: pointer;
-      transition: transform 0.18s ease, opacity 0.18s ease, box-shadow 0.18s ease;
+      transition: transform 0.15s ease, opacity 0.15s ease, box-shadow 0.15s ease, filter 0.15s ease;
     }
 
     button:hover:not(:disabled) {
       transform: translateY(-1px);
+      filter: brightness(1.08);
+    }
+
+    button:active:not(:disabled) {
+      transform: translateY(0);
+      filter: brightness(0.96);
     }
 
     button:disabled {
       cursor: not-allowed;
-      opacity: 0.5;
+      opacity: 0.45;
     }
 
     #submit-button {
       background: linear-gradient(135deg, #55d0ff 0%, #4f7cff 100%);
       color: #081019;
-      box-shadow: 0 12px 24px rgba(79, 124, 255, 0.28);
+      box-shadow: 0 8px 20px rgba(79, 124, 255, 0.25);
+      position: relative;
+      overflow: hidden;
+    }
+
+    #submit-button.running {
+      background: linear-gradient(135deg, #3a9dbf 0%, #3a5fbf 100%);
+    }
+
+    #submit-button.running::after {
+      content: "";
+      position: absolute;
+      top: 0;
+      left: -100%;
+      width: 100%;
+      height: 100%;
+      background: linear-gradient(90deg, transparent, rgba(255,255,255,0.15), transparent);
+      animation: submitShimmer 1.8s ease-in-out infinite;
+    }
+
+    @keyframes submitShimmer {
+      0% { left: -100%; }
+      100% { left: 100%; }
     }
 
     #stop-button {
       background: linear-gradient(135deg, rgba(255, 121, 121, 0.95), rgba(219, 74, 74, 0.95));
       color: white;
-      box-shadow: 0 12px 24px rgba(219, 74, 74, 0.24);
+      box-shadow: 0 8px 20px rgba(219, 74, 74, 0.2);
     }
 
     .log-panel {
       min-height: 0;
+      flex: 1;
       display: flex;
       flex-direction: column;
-      padding: 14px;
+      padding: 12px;
       border: 1px solid var(--line);
-      border-radius: 18px;
+      border-radius: 16px;
       background: rgba(0, 0, 0, 0.22);
       overflow: hidden;
     }
@@ -234,60 +317,91 @@
       justify-content: space-between;
       align-items: center;
       gap: 12px;
-      margin-bottom: 12px;
+      margin-bottom: 10px;
     }
 
     .log-panel h2 {
       margin: 0;
-      font-size: 15px;
+      font-size: 14px;
+      font-weight: 600;
+    }
+
+    .log-panel-header-right {
+      display: flex;
+      align-items: center;
+      gap: 10px;
     }
 
     .log-panel span {
       color: var(--muted);
-      font-size: 12px;
+      font-size: 11px;
+    }
+
+    .clear-log-btn {
+      padding: 4px 10px;
+      border: 1px solid rgba(162, 184, 214, 0.15);
+      border-radius: 8px;
+      background: rgba(255, 255, 255, 0.04);
+      color: var(--muted);
+      font-size: 11px;
+      font-weight: 600;
+      cursor: pointer;
+      transition: background 0.15s ease, color 0.15s ease, border-color 0.15s ease;
+    }
+
+    .clear-log-btn:hover {
+      background: rgba(255, 121, 121, 0.1);
+      color: #ffb0b0;
+      border-color: rgba(255, 121, 121, 0.2);
     }
 
     #output-log {
       flex: 1;
-      min-height: 180px;
+      min-height: 120px;
       overflow: auto;
-      padding-right: 6px;
+      padding-right: 4px;
       display: grid;
-      gap: 10px;
+      gap: 6px;
     }
 
     .log-entry {
-      padding: 12px 14px;
-      border-radius: 14px;
-      border: 1px solid rgba(255, 255, 255, 0.07);
-      background: rgba(255, 255, 255, 0.03);
+      padding: 10px 12px;
+      border-radius: 12px;
+      border: 1px solid rgba(255, 255, 255, 0.06);
+      background: rgba(255, 255, 255, 0.025);
       display: grid;
-      gap: 8px;
+      gap: 6px;
+      word-wrap: break-word;
+      overflow-wrap: break-word;
+    }
+
+    .log-entry:nth-child(even) {
+      background: rgba(255, 255, 255, 0.04);
     }
 
     .log-entry.user {
-      border-color: rgba(85, 208, 255, 0.2);
-      background: rgba(85, 208, 255, 0.08);
+      border-color: rgba(85, 208, 255, 0.18);
+      background: rgba(85, 208, 255, 0.06);
     }
 
     .log-entry.assistant {
-      border-color: rgba(97, 240, 194, 0.18);
-      background: rgba(97, 240, 194, 0.08);
+      border-color: rgba(97, 240, 194, 0.15);
+      background: rgba(97, 240, 194, 0.06);
     }
 
     .log-entry.tool {
-      border-color: rgba(255, 204, 102, 0.2);
-      background: rgba(255, 204, 102, 0.08);
+      border-color: rgba(255, 204, 102, 0.18);
+      background: rgba(255, 204, 102, 0.06);
     }
 
     .log-entry.error {
-      border-color: rgba(255, 121, 121, 0.25);
-      background: rgba(255, 121, 121, 0.09);
+      border-color: rgba(255, 121, 121, 0.2);
+      background: rgba(255, 121, 121, 0.07);
     }
 
     .log-entry.status {
-      border-color: rgba(255, 255, 255, 0.09);
-      background: rgba(255, 255, 255, 0.04);
+      border-color: rgba(255, 255, 255, 0.06);
+      background: rgba(255, 255, 255, 0.03);
     }
 
     .log-topline {
@@ -298,16 +412,55 @@
     }
 
     .log-kind {
-      font-size: 12px;
+      font-size: 11px;
       font-weight: 700;
       letter-spacing: 0.05em;
       text-transform: uppercase;
+      display: flex;
+      align-items: center;
+      gap: 6px;
+    }
+
+    .log-kind-icon {
+      width: 16px;
+      height: 16px;
+      border-radius: 4px;
+      display: inline-grid;
+      place-items: center;
+      font-size: 9px;
+      flex-shrink: 0;
+    }
+
+    .log-entry.user .log-kind-icon {
+      background: rgba(85, 208, 255, 0.2);
+      color: #55d0ff;
+    }
+
+    .log-entry.assistant .log-kind-icon {
+      background: rgba(97, 240, 194, 0.2);
+      color: #61f0c2;
+    }
+
+    .log-entry.tool .log-kind-icon {
+      background: rgba(255, 204, 102, 0.2);
+      color: #ffcc66;
+    }
+
+    .log-entry.error .log-kind-icon {
+      background: rgba(255, 121, 121, 0.2);
+      color: #ff7979;
+    }
+
+    .log-entry.status .log-kind-icon {
+      background: rgba(255, 255, 255, 0.1);
+      color: var(--muted);
     }
 
     .log-time {
       color: var(--muted);
-      font-size: 11px;
+      font-size: 10px;
       white-space: nowrap;
+      font-family: var(--mono);
     }
 
     .log-content,
@@ -317,12 +470,38 @@
       word-break: break-word;
       line-height: 1.45;
       font-family: inherit;
-      font-size: 14px;
+      font-size: 13px;
+    }
+
+    .typing-indicator {
+      display: inline-flex;
+      align-items: center;
+      gap: 4px;
+      padding: 8px 14px;
+      border-radius: 12px;
+      border: 1px solid rgba(97, 240, 194, 0.15);
+      background: rgba(97, 240, 194, 0.06);
+    }
+
+    .typing-indicator .dot {
+      width: 6px;
+      height: 6px;
+      border-radius: 50%;
+      background: var(--accent-2);
+      animation: typingBounce 1.2s ease-in-out infinite;
+    }
+
+    .typing-indicator .dot:nth-child(2) { animation-delay: 0.15s; }
+    .typing-indicator .dot:nth-child(3) { animation-delay: 0.3s; }
+
+    @keyframes typingBounce {
+      0%, 60%, 100% { opacity: 0.3; transform: translateY(0); }
+      30% { opacity: 1; transform: translateY(-4px); }
     }
 
     .tool-details {
       border: 1px solid rgba(255, 255, 255, 0.08);
-      border-radius: 12px;
+      border-radius: 10px;
       background: rgba(0, 0, 0, 0.18);
       overflow: hidden;
     }
@@ -330,9 +509,10 @@
     .tool-details summary {
       cursor: pointer;
       list-style: none;
-      padding: 10px 12px;
+      padding: 8px 10px;
       font-family: var(--mono);
-      font-size: 12px;
+      font-size: 11px;
+      color: var(--warning);
     }
 
     .tool-details summary::-webkit-details-marker {
@@ -341,10 +521,10 @@
 
     .tool-details pre {
       margin: 0;
-      padding: 0 12px 12px;
+      padding: 0 10px 10px;
       color: #d9e2f5;
       font-family: var(--mono);
-      font-size: 12px;
+      font-size: 11px;
       line-height: 1.5;
       white-space: pre-wrap;
       word-break: break-word;
@@ -361,7 +541,7 @@
       box-shadow: var(--shadow);
     }
 
-    @media (max-width: 980px) {
+    @media (max-width: 1023px) {
       body {
         grid-template-columns: 1fr;
       }
@@ -369,6 +549,7 @@
       #agent-control {
         position: static;
         height: auto;
+        max-height: none;
       }
 
       #agent-world {
@@ -381,8 +562,12 @@
   <div id="agent-control">
     <div class="control-header">
       <div class="eyebrow">Protected Control Plane</div>
-      <h1>Self-Modifying Web Agent</h1>
-      <p>Enter an API key, describe the change you want, and let the model update only the mutable world pane.</p>
+      <div class="control-title-row">
+        <div class="control-icon">&#9881;</div>
+        <h1>Agent Control</h1>
+      </div>
+      <p>Describe the change you want and let the model update only the mutable world pane.</p>
+      <div class="model-badge" id="model-badge">gpt-4o-mini</div>
     </div>
 
     <div class="status-row">
@@ -417,7 +602,10 @@
     <div class="log-panel">
       <div class="log-panel-header">
         <h2>Output Log</h2>
-        <span>Messages, tools, guardrails, errors</span>
+        <div class="log-panel-header-right">
+          <span>Messages, tools, guardrails</span>
+          <button class="clear-log-btn" id="clear-log-btn" type="button">Clear</button>
+        </div>
       </div>
       <div id="output-log" aria-live="polite"></div>
     </div>
@@ -429,28 +617,96 @@
         color: #111;
       }
 
+      @keyframes sparkleFloat {
+        0%, 100% { opacity: 0; transform: translateY(0) scale(0.5); }
+        50% { opacity: 1; transform: translateY(-18px) scale(1); }
+      }
+
+      @keyframes rainbowShift {
+        0% { filter: hue-rotate(0deg); }
+        100% { filter: hue-rotate(360deg); }
+      }
+
+      @keyframes gradientShift {
+        0% { background-position: 0% 50%; }
+        50% { background-position: 100% 50%; }
+        100% { background-position: 0% 50%; }
+      }
+
+      @keyframes marqueeScroll {
+        0% { transform: translateX(100%); }
+        100% { transform: translateX(-100%); }
+      }
+
+      @keyframes blink {
+        50% { opacity: 0.2; }
+      }
+
+      @keyframes pulse {
+        0%, 100% { transform: scale(1); }
+        50% { transform: scale(1.05); }
+      }
+
+      @keyframes glowPulse {
+        0%, 100% { box-shadow: 0 0 8px rgba(255, 0, 200, 0.4), 0 0 20px rgba(255, 0, 200, 0.2); }
+        50% { box-shadow: 0 0 16px rgba(255, 0, 200, 0.7), 0 0 40px rgba(255, 0, 200, 0.4); }
+      }
+
       #agent-world .retro-page {
         min-height: 100%;
-        padding: 18px;
-        background:
-          linear-gradient(180deg, #72cbff 0%, #d9f1ff 18%, #ffe6fb 68%, #fff7c0 100%);
-        font-family: Verdana, Tahoma, sans-serif;
+        padding: 0;
+        background: linear-gradient(135deg, #ff00ff22, #00ffff18, #00ff0012, #ff00ff22);
+        background-size: 400% 400%;
+        animation: gradientShift 12s ease infinite;
+        font-family: "Comic Sans MS", "Chalkboard SE", Verdana, Tahoma, sans-serif;
+        position: relative;
+        overflow: hidden;
+      }
+
+      #agent-world .sparkle-layer {
+        position: absolute;
+        top: 0;
+        left: 0;
+        width: 100%;
+        height: 100%;
+        pointer-events: none;
+        z-index: 0;
+        overflow: hidden;
+      }
+
+      #agent-world .sparkle {
+        position: absolute;
+        width: 4px;
+        height: 4px;
+        border-radius: 50%;
+        background: #fff;
+        animation: sparkleFloat 3s ease-in-out infinite;
       }
 
       #agent-world .retro-shell {
-        max-width: 1040px;
+        position: relative;
+        z-index: 1;
+        max-width: 1060px;
         margin: 0 auto;
-        border: 4px ridge #f8f8f8;
-        background: #ffffff;
-        box-shadow: 0 0 0 4px #4f74d9, 0 0 22px rgba(58, 49, 123, 0.35);
+        border: 5px ridge #c0c0c0;
+        background: #fff;
+        box-shadow:
+          0 0 0 3px #ff00c8,
+          0 0 0 6px #00ffff,
+          0 0 30px rgba(255, 0, 200, 0.3),
+          0 0 60px rgba(0, 255, 255, 0.15);
       }
 
       #agent-world .retro-banner {
-        padding: 16px 18px;
+        padding: 20px 22px;
         color: #fff;
         background:
-          linear-gradient(90deg, #ff5db8 0%, #7348ff 40%, #27b3ff 100%);
-        border-bottom: 4px solid #ffef7a;
+          linear-gradient(90deg, #ff00c8, #ff5db8, #7348ff, #27b3ff, #00ff88, #ff00c8);
+        background-size: 300% 100%;
+        animation: gradientShift 6s ease infinite;
+        border-bottom: 5px solid #ffef7a;
+        text-align: center;
+        position: relative;
       }
 
       #agent-world .retro-banner h2,
@@ -459,86 +715,156 @@
       }
 
       #agent-world .retro-banner h2 {
-        font-size: 28px;
-        text-shadow: 2px 2px 0 #4a178d;
+        font-size: 36px;
+        text-shadow:
+          3px 3px 0 #4a178d,
+          -1px -1px 0 #ff00c8,
+          0 0 20px rgba(255, 255, 255, 0.5);
+        animation: rainbowShift 4s linear infinite;
+        display: inline-block;
       }
 
       #agent-world .retro-banner p {
         margin-top: 8px;
         font-size: 13px;
+        text-shadow: 1px 1px 0 rgba(0,0,0,0.4);
+      }
+
+      #agent-world .marquee-bar {
+        padding: 8px 0;
+        background: linear-gradient(90deg, #ff00c8, #7348ff, #00ff88, #ff00c8);
+        background-size: 300% 100%;
+        animation: gradientShift 4s ease infinite;
+        overflow: hidden;
+        white-space: nowrap;
+        position: relative;
+        z-index: 1;
+      }
+
+      #agent-world .marquee-text {
+        display: inline-block;
+        animation: marqueeScroll 18s linear infinite;
+        color: #fff;
+        font-size: 14px;
+        font-weight: bold;
+        text-shadow: 1px 1px 0 rgba(0,0,0,0.4);
+        letter-spacing: 0.05em;
+      }
+
+      #agent-world .visitor-counter {
+        text-align: center;
+        padding: 10px;
+        background: #000;
+        color: #00ff00;
+        font-family: "Courier New", monospace;
+        font-size: 13px;
+        font-weight: bold;
+        letter-spacing: 0.1em;
+        position: relative;
+        z-index: 1;
+        border-top: 2px solid #333;
+        border-bottom: 2px solid #333;
+      }
+
+      #agent-world .visitor-counter .counter-digits {
+        display: inline-block;
+        background: #111;
+        padding: 4px 12px;
+        border: 2px inset #444;
+        color: #00ff00;
+        font-size: 16px;
+        letter-spacing: 0.15em;
+        margin-left: 6px;
       }
 
       #agent-world .retro-grid {
         display: grid;
-        grid-template-columns: 280px minmax(0, 1fr);
+        grid-template-columns: 300px minmax(0, 1fr);
         gap: 16px;
         padding: 16px;
+        position: relative;
+        z-index: 1;
       }
 
       #agent-world .retro-card {
         border: 3px solid #244db7;
         background: #fdfdfd;
+        box-shadow: 3px 3px 0 rgba(0,0,0,0.15);
       }
 
       #agent-world .retro-card h3 {
         margin: 0;
-        padding: 8px 10px;
+        padding: 8px 12px;
         font-size: 14px;
         color: #fff;
-        background:
-          linear-gradient(180deg, #3c7cff 0%, #0b43b6 100%);
+        background: linear-gradient(180deg, #3c7cff 0%, #0b43b6 100%);
         text-transform: uppercase;
-        letter-spacing: 0.05em;
+        letter-spacing: 0.06em;
+        text-shadow: 1px 1px 0 rgba(0,0,0,0.3);
       }
 
       #agent-world .retro-card-body {
-        padding: 12px;
+        padding: 14px;
       }
 
       #agent-world .profile-box {
         display: grid;
-        grid-template-columns: 92px minmax(0, 1fr);
-        gap: 12px;
+        grid-template-columns: 110px minmax(0, 1fr);
+        gap: 14px;
         align-items: center;
       }
 
       #agent-world .avatar {
-        width: 92px;
-        height: 92px;
-        border: 4px ridge #ffd84f;
-        background:
-          radial-gradient(circle at 35% 30%, #fff6a6 0%, #f6a500 40%, #ea4ca5 100%);
+        width: 110px;
+        height: 110px;
+        border: 5px ridge #ffd84f;
+        background: radial-gradient(circle at 35% 30%, #fff6a6 0%, #f6a500 40%, #ea4ca5 100%);
         display: grid;
         place-items: center;
         color: white;
         font-weight: bold;
-        font-size: 12px;
+        font-size: 13px;
         text-align: center;
+        animation: glowPulse 2s ease-in-out infinite;
+        text-shadow: 1px 1px 2px rgba(0,0,0,0.5);
       }
 
       #agent-world .tagline {
         margin: 6px 0 0;
         color: #a11f76;
         font-weight: bold;
+        font-size: 13px;
       }
 
       #agent-world .blink {
-        animation: retroBlink 1.2s step-end infinite;
+        animation: blink 1.2s step-end infinite;
         color: #d31717;
+        font-weight: bold;
       }
 
-      @keyframes retroBlink {
-        50% {
-          opacity: 0.2;
-        }
+      #agent-world .mood-indicator {
+        margin-top: 10px;
+        padding: 10px;
+        border: 3px double #ff00c8;
+        background: linear-gradient(135deg, #fff0fa, #ffe6f7);
+        display: flex;
+        align-items: center;
+        gap: 8px;
+        font-size: 13px;
+      }
+
+      #agent-world .mood-emoji {
+        font-size: 24px;
+        animation: pulse 1.5s ease-in-out infinite;
       }
 
       #agent-world .stats {
         margin-top: 10px;
-        padding: 8px;
+        padding: 10px;
         border: 2px dashed #ff59a8;
         background: #fff4fb;
         font-size: 13px;
+        line-height: 1.6;
       }
 
       #agent-world .friends-list {
@@ -548,21 +874,44 @@
       }
 
       #agent-world .friend {
-        padding: 8px;
+        padding: 10px;
         border: 2px solid #ffd84f;
         background: #fff9d5;
         text-align: center;
-        font-size: 12px;
+        font-size: 11px;
+        box-shadow: 2px 2px 0 rgba(0,0,0,0.08);
+        transition: transform 0.15s ease;
+      }
+
+      #agent-world .friend:hover {
+        transform: scale(1.04);
       }
 
       #agent-world .friend-avatar {
-        width: 48px;
-        height: 48px;
+        width: 44px;
+        height: 44px;
         margin: 0 auto 6px;
-        border: 2px solid #2d44b4;
-        background:
-          linear-gradient(135deg, #8ef0ff 0%, #ff7dd0 100%);
+        border-radius: 50%;
+        border: 2px solid #fff;
+        display: grid;
+        place-items: center;
+        font-weight: bold;
+        font-size: 13px;
+        color: #fff;
+        text-shadow: 1px 1px 0 rgba(0,0,0,0.3);
+        box-shadow: 2px 2px 4px rgba(0,0,0,0.15);
       }
+
+      #agent-world .friend:nth-child(1) .friend-avatar { background: linear-gradient(135deg, #ff00c8, #ff5db8); }
+      #agent-world .friend:nth-child(2) .friend-avatar { background: linear-gradient(135deg, #00ccff, #0066ff); }
+      #agent-world .friend:nth-child(3) .friend-avatar { background: linear-gradient(135deg, #00ff88, #00cc44); }
+      #agent-world .friend:nth-child(4) .friend-avatar { background: linear-gradient(135deg, #ff6600, #ffcc00); }
+      #agent-world .friend:nth-child(5) .friend-avatar { background: linear-gradient(135deg, #aa00ff, #ff00aa); }
+      #agent-world .friend:nth-child(6) .friend-avatar { background: linear-gradient(135deg, #ff0044, #ff6600); }
+      #agent-world .friend:nth-child(7) .friend-avatar { background: linear-gradient(135deg, #00ffcc, #0088ff); }
+      #agent-world .friend:nth-child(8) .friend-avatar { background: linear-gradient(135deg, #ffcc00, #ff0066); }
+      #agent-world .friend:nth-child(9) .friend-avatar { background: linear-gradient(135deg, #66ff00, #00ccff); }
+      #agent-world .friend:nth-child(10) .friend-avatar { background: linear-gradient(135deg, #ff00ff, #00ffff); }
 
       #agent-world .music-player {
         display: grid;
@@ -574,11 +923,54 @@
         padding: 10px;
         border: 2px inset #d9e2ff;
         background: #eef3ff;
+        font-size: 13px;
+      }
+
+      #agent-world .track-list {
+        display: grid;
+        gap: 4px;
+        margin-top: 8px;
+      }
+
+      #agent-world .track-item {
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        padding: 6px 8px;
+        border: 1px solid #d0d8f0;
+        background: #f5f8ff;
+        font-size: 12px;
+      }
+
+      #agent-world .track-item .track-num {
+        color: #4f74d9;
+        font-weight: bold;
+        margin-right: 6px;
+      }
+
+      #agent-world .track-item .track-dur {
+        color: #888;
+        font-family: "Courier New", monospace;
+        font-size: 11px;
+      }
+
+      #agent-world .progress-bar {
+        width: 100%;
+        height: 10px;
+        border: 2px inset #c0c0c0;
+        background: #ddd;
+        position: relative;
+      }
+
+      #agent-world .progress-fill {
+        height: 100%;
+        width: 35%;
+        background: linear-gradient(90deg, #3c7cff, #7348ff);
       }
 
       #agent-world .player-controls {
         display: flex;
-        gap: 8px;
+        gap: 6px;
       }
 
       #agent-world .player-controls button {
@@ -588,34 +980,60 @@
         background: linear-gradient(180deg, #fefefe 0%, #c4d4ff 100%);
         color: #10224b;
         font-weight: bold;
+        font-size: 12px;
+        cursor: pointer;
+        box-shadow: 1px 1px 0 rgba(0,0,0,0.15);
+      }
+
+      #agent-world .player-controls button:active {
+        border-style: inset;
       }
 
       #agent-world .about-copy {
-        line-height: 1.6;
+        line-height: 1.7;
         font-size: 14px;
       }
 
       #agent-world .hero-box {
         border: 3px dashed #ff7dd0;
-        padding: 12px;
-        background: #fff0fa;
+        padding: 14px;
+        background: linear-gradient(135deg, #fff0fa, #ffe6f7);
         margin-bottom: 14px;
+        text-shadow: 0 0 1px rgba(255, 0, 200, 0.1);
       }
 
       #agent-world .stamp-row {
         display: flex;
-        gap: 10px;
+        gap: 8px;
         flex-wrap: wrap;
         margin-top: 14px;
       }
 
       #agent-world .stamp {
-        padding: 8px 10px;
+        padding: 6px 10px;
         border: 2px solid #0b43b6;
         background: linear-gradient(180deg, #fff 0%, #dfe8ff 100%);
-        font-size: 12px;
+        font-size: 11px;
         font-weight: bold;
         color: #b0127e;
+        box-shadow: 2px 2px 0 rgba(0,0,0,0.1);
+      }
+
+      #agent-world .meet-section {
+        padding: 12px;
+        border: 2px solid #00ff88;
+        background: linear-gradient(135deg, #f0fff4, #e6ffe6);
+        font-size: 13px;
+        line-height: 1.6;
+      }
+
+      #agent-world .meet-section ul {
+        margin: 8px 0 0;
+        padding-left: 18px;
+      }
+
+      #agent-world .meet-section li {
+        margin-bottom: 4px;
       }
 
       @media (max-width: 860px) {
@@ -626,10 +1044,22 @@
     </style>
 
     <div class="retro-page">
+      <div class="sparkle-layer" id="sparkle-layer"></div>
+
       <div class="retro-shell">
         <div class="retro-banner">
           <h2>xX_AgentMaster_Xx</h2>
           <p>Currently tuned to chrome dreams, glitter GIFs, and suspiciously loud AIM away messages.</p>
+        </div>
+
+        <div class="marquee-bar">
+          <span class="marquee-text">
+            &#9733; WELCOME 2 MY PAGE &#9733;  Leave a comment &hearts;  Best viewed on Internet Explorer 6  &#9733;  NEW MUSIC ADDED 03/15/2004  &#9733;  Don't forget to rate my profile!!  &#9733;  If you're reading this you're officially cool &#9733;
+          </span>
+        </div>
+
+        <div class="visitor-counter">
+          You are visitor <span class="counter-digits">048,291</span> &mdash; thanks for stopping by!
         </div>
 
         <div class="retro-grid">
@@ -642,13 +1072,21 @@
                   <div>
                     <strong>xX_AgentMaster_Xx</strong>
                     <p class="tagline">"coding in glitter fonts since forever"</p>
-                    <p><span class="blink">Online Now!</span></p>
+                    <p><span class="blink">&#9679; Online Now!</span></p>
+                  </div>
+                </div>
+                <div class="mood-indicator">
+                  <span class="mood-emoji">&#128525;</span>
+                  <div>
+                    <strong>Mood:</strong> Cyber-Sentimental<br>
+                    <small style="color: #888;">updated 2 min ago</small>
                   </div>
                 </div>
                 <div class="stats">
-                  Mood: cyber-sentimental<br>
-                  Status: tweaking my page again<br>
-                  Last login: 11:11 PM
+                  <strong>Status:</strong> tweaking my page again<br>
+                  <strong>Last Login:</strong> 11:11 PM<br>
+                  <strong>Profile Views:</strong> 48,291<br>
+                  <strong>Song Plays:</strong> 12,847
                 </div>
               </div>
             </section>
@@ -657,12 +1095,32 @@
               <h3>Top Friends</h3>
               <div class="retro-card-body">
                 <div class="friends-list">
-                  <div class="friend"><div class="friend-avatar"></div>GlitterGhoul</div>
-                  <div class="friend"><div class="friend-avatar"></div>ByteBabe</div>
-                  <div class="friend"><div class="friend-avatar"></div>NeonHamster</div>
-                  <div class="friend"><div class="friend-avatar"></div>SceneMachine</div>
-                  <div class="friend"><div class="friend-avatar"></div>PixelCrush</div>
-                  <div class="friend"><div class="friend-avatar"></div>Y2KWizard</div>
+                  <div class="friend"><div class="friend-avatar">GG</div>GlitterGhoul</div>
+                  <div class="friend"><div class="friend-avatar">BB</div>ByteBabe</div>
+                  <div class="friend"><div class="friend-avatar">NH</div>NeonHamster</div>
+                  <div class="friend"><div class="friend-avatar">SM</div>SceneMachine</div>
+                  <div class="friend"><div class="friend-avatar">PC</div>PixelCrush</div>
+                  <div class="friend"><div class="friend-avatar">Y2</div>Y2KWizard</div>
+                  <div class="friend"><div class="friend-avatar">RK</div>RaveKitten</div>
+                  <div class="friend"><div class="friend-avatar">CB</div>CyberBlaze</div>
+                  <div class="friend"><div class="friend-avatar">ZK</div>ZeroKelvin</div>
+                  <div class="friend"><div class="friend-avatar">LM</div>LavaMoth</div>
+                </div>
+              </div>
+            </section>
+
+            <section class="retro-card" style="margin-top: 16px;">
+              <h3>Who I'd Like to Meet</h3>
+              <div class="retro-card-body">
+                <div class="meet-section">
+                  <strong>People who:</strong>
+                  <ul>
+                    <li>Know all the words to "All The Things She Said"</li>
+                    <li>Can explain why AIM away messages were peak communication</li>
+                    <li>Still have their original Neopets account</li>
+                    <li>Believe Limewire was a personality test</li>
+                    <li>Remember when "pokes" meant something</li>
+                  </ul>
                 </div>
               </div>
             </section>
@@ -673,33 +1131,45 @@
               <h3>About Me</h3>
               <div class="retro-card-body">
                 <div class="hero-box">
-                  Welcome 2 my digital kingdom. This page is running on caffeine, chaos, and the deep belief that every profile deserves at least three gradients.
+                  Welcome 2 my digital kingdom. This page is running on caffeine, chaos, and the deep belief that every profile deserves at least three gradients. If u don't like blink tags, u r not welcome here.
                 </div>
                 <div class="about-copy">
-                  I like collecting fake band buttons, making layouts way too bright, and pretending my profile song is always the song of the summer. If you are here to judge my glitter choices, please sign the guestbook first.
+                  I like collecting fake band buttons, making layouts way too bright, and pretending my profile song is always the song of the summer. If you are here to judge my glitter choices, please sign the guestbook first. I once spent 6 hours on a layout and my mom said it looked "nice." That's a 5-star review in my book.
                 </div>
                 <div class="stamp-row">
-                  <div class="stamp">HTML Survivor</div>
-                  <div class="stamp">CSS Chaos Club</div>
-                  <div class="stamp">Best Viewed Loudly</div>
+                  <div class="stamp">&#9733; HTML Survivor</div>
+                  <div class="stamp">&#9733; CSS Chaos Club</div>
+                  <div class="stamp">&#9733; Best Viewed Loudly</div>
+                  <div class="stamp">&#9733; 56k Modem Hero</div>
                 </div>
               </div>
             </section>
 
             <section class="retro-card" style="margin-top: 16px;">
-              <h3>Music Player</h3>
+              <h3>&#9835; Music Player &#9835;</h3>
               <div class="retro-card-body">
                 <div class="music-player">
                   <div class="track">
-                    <strong>Now Pretending To Play:</strong><br>
+                    <strong>Now Playing:</strong><br>
                     "Laser Heartbeat (MySpace Cut)" by DJ Away Message
                   </div>
-                  <div class="player-controls">
-                    <button type="button">Play</button>
-                    <button type="button">Pause</button>
-                    <button type="button">Skip</button>
+                  <div class="progress-bar">
+                    <div class="progress-fill"></div>
                   </div>
-                  <small>Audio not included. Vibes absolutely included.</small>
+                  <div class="track-list">
+                    <div class="track-item"><span><span class="track-num">1.</span> Laser Heartbeat</span> <span class="track-dur">3:42</span></div>
+                    <div class="track-item"><span><span class="track-num">2.</span> Glitch Love Anthem</span> <span class="track-dur">4:15</span></div>
+                    <div class="track-item"><span><span class="track-num">3.</span> Neon Midnight Run</span> <span class="track-dur">2:58</span></div>
+                    <div class="track-item"><span><span class="track-num">4.</span> AIM Notification Symphony</span> <span class="track-dur">5:01</span></div>
+                    <div class="track-item"><span><span class="track-num">5.</span> Ctrl+Alt+Del My Heart</span> <span class="track-dur">3:33</span></div>
+                  </div>
+                  <div class="player-controls">
+                    <button type="button">&#9198;</button>
+                    <button type="button">&#9654;</button>
+                    <button type="button">&#10074;&#10074;</button>
+                    <button type="button">&#9197;</button>
+                  </div>
+                  <small style="color: #888; text-align: center;">Audio not included. Vibes absolutely included.</small>
                 </div>
               </div>
             </section>
@@ -820,6 +1290,16 @@
     const submitButton = document.getElementById("submit-button");
     const stopButton = document.getElementById("stop-button");
     const agentWorld = document.getElementById("agent-world");
+    const modelBadge = document.getElementById("model-badge");
+    const clearLogBtn = document.getElementById("clear-log-btn");
+
+    modelInput.addEventListener("input", function() {
+      modelBadge.textContent = modelInput.value.trim() || "gpt-4o-mini";
+    });
+
+    clearLogBtn.addEventListener("click", function() {
+      outputLog.innerHTML = "";
+    });
 
     function timestamp() {
       return new Date().toLocaleTimeString([], {
@@ -838,7 +1318,38 @@
       outputLog.scrollTop = outputLog.scrollHeight;
     }
 
+    var typingIndicator = null;
+
+    function showTypingIndicator() {
+      if (typingIndicator) return;
+      typingIndicator = document.createElement("div");
+      typingIndicator.className = "typing-indicator";
+      typingIndicator.innerHTML = '<div class="dot"></div><div class="dot"></div><div class="dot"></div>';
+      outputLog.appendChild(typingIndicator);
+      scrollLogToBottom();
+    }
+
+    function hideTypingIndicator() {
+      if (typingIndicator && typingIndicator.parentNode) {
+        typingIndicator.parentNode.removeChild(typingIndicator);
+      }
+      typingIndicator = null;
+    }
+
+    function getKindIcon(kind) {
+      var icons = {
+        user: "\u2709",
+        assistant: "\u2726",
+        tool: "\u2699",
+        error: "\u26A0",
+        status: "\u25CF"
+      };
+      return icons[kind] || "\u25CF";
+    }
+
     function addLogEntry(kind, content, options = {}) {
+      hideTypingIndicator();
+
       const entry = document.createElement("div");
       entry.className = "log-entry " + kind;
 
@@ -847,7 +1358,16 @@
 
       const label = document.createElement("div");
       label.className = "log-kind";
-      label.textContent = options.label || kind;
+
+      var icon = document.createElement("span");
+      icon.className = "log-kind-icon";
+      icon.textContent = getKindIcon(options.label || kind);
+
+      var labelText = document.createElement("span");
+      labelText.textContent = options.label || kind;
+
+      label.appendChild(icon);
+      label.appendChild(labelText);
 
       const time = document.createElement("div");
       time.className = "log-time";
@@ -1183,12 +1703,16 @@
       interrupted = false;
       isRunning = true;
       submitButton.disabled = true;
+      submitButton.textContent = "Running...";
+      submitButton.classList.add("running");
       setStatus("Running", "running");
       addLogEntry("status", "Agent loop started.", { label: "status" });
 
       try {
         while (!interrupted) {
+          showTypingIndicator();
           const response = await callLLM(conversationHistory);
+          hideTypingIndicator();
 
           if (interrupted) {
             break;
@@ -1297,10 +1821,13 @@
           break;
         }
       } catch (error) {
+        hideTypingIndicator();
         addLogEntry("error", error.message, { label: "runtime error" });
       } finally {
         isRunning = false;
         submitButton.disabled = false;
+        submitButton.textContent = "Run Agent";
+        submitButton.classList.remove("running");
         if (interrupted) {
           setStatus("Interrupted", "interrupted");
           addLogEntry("status", "Interrupted.", { label: "status" });
@@ -1336,6 +1863,7 @@
     stopButton.addEventListener("click", () => {
       interrupted = true;
       if (isRunning) {
+        hideTypingIndicator();
         setStatus("Interrupted", "interrupted");
         addLogEntry("status", "Stop requested. The current loop will halt before the next tool or model step.", {
           label: "status"
@@ -1351,6 +1879,22 @@
         submitButton.click();
       }
     });
+
+    (function initSparkles() {
+      var layer = document.getElementById("sparkle-layer");
+      if (!layer) return;
+      for (var i = 0; i < 30; i++) {
+        var s = document.createElement("div");
+        s.className = "sparkle";
+        s.style.left = (Math.random() * 100) + "%";
+        s.style.top = (Math.random() * 100) + "%";
+        s.style.animationDelay = (Math.random() * 3) + "s";
+        s.style.animationDuration = (2 + Math.random() * 3) + "s";
+        s.style.width = (2 + Math.random() * 4) + "px";
+        s.style.height = s.style.width;
+        layer.appendChild(s);
+      }
+    })();
 
     addLogEntry("status", "Harness ready. The control plane is protected; only #agent-world is mutable.", {
       label: "status"
