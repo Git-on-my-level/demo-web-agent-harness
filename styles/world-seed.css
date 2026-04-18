@@ -532,4 +532,57 @@
   #agent-world .retro-grid {
     grid-template-columns: 1fr;
   }
+
+  #agent-world .profile-box {
+    grid-template-columns: 80px minmax(0, 1fr);
+    gap: 10px;
+  }
+
+  #agent-world .avatar {
+    width: 80px;
+    height: 80px;
+    font-size: 11px;
+  }
+
+  #agent-world .retro-banner h2 {
+    font-size: 24px;
+  }
+
+  #agent-world .retro-banner {
+    padding: 14px 16px;
+  }
+
+  #agent-world .retro-shell {
+    border-width: 3px;
+    box-shadow:
+      0 0 0 2px #ff00c8,
+      0 0 0 4px #00ffff,
+      0 0 16px rgba(255, 0, 200, 0.2),
+      0 0 32px rgba(0, 255, 255, 0.1);
+  }
+}
+
+@media (max-width: 480px) {
+  #agent-world .retro-grid {
+    padding: 10px;
+    gap: 10px;
+  }
+
+  #agent-world .profile-box {
+    grid-template-columns: 1fr;
+    justify-items: center;
+    text-align: center;
+  }
+
+  #agent-world .friends-list {
+    grid-template-columns: 1fr;
+  }
+
+  #agent-world .retro-banner h2 {
+    font-size: 20px;
+  }
+
+  #agent-world .about-copy {
+    font-size: 13px;
+  }
 }

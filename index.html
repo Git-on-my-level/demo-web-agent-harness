@@ -2,7 +2,7 @@
 <html lang="en">
 <head>
   <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
   <title>Self-Modifying Web Agent Harness</title>
   <style>
     /* ═══════════════════════════════════════════════════════════
@@ -102,13 +102,18 @@
     @media (max-width: 1023px) {
       body {
         grid-template-columns: 1fr;
-        padding: 12px 12px 72px 12px;
+        padding: 0;
+        padding-top: calc(50px + env(safe-area-inset-top, 0px));
+        gap: 0;
       }
 
       #agent-control {
         position: static;
         height: auto;
         max-height: none;
+        border-radius: 0;
+        border-left: 0;
+        border-right: 0;
       }
 
       #agent-control.mobile-hidden,
@@ -117,7 +122,10 @@
       }
 
       #agent-world {
-        min-height: calc(100vh - 120px);
+        min-height: calc(100vh - 48px);
+        border-radius: 0;
+        border-left: 0;
+        border-right: 0;
       }
 
       #mobile-nav {
@@ -705,44 +713,54 @@
     }
 
     /* ═══════════════════════════════════════════════════════════
-       MOBILE NAV — bottom tab bar for switching Control / World
+       MOBILE NAV — segmented control pinned to top of viewport
        ═══════════════════════════════════════════════════════════ */
     #mobile-nav {
       display: none;
       position: fixed;
-      bottom: 0;
+      top: 0;
       left: 0;
       right: 0;
       z-index: 1000;
-      background: linear-gradient(180deg, rgba(18, 24, 35, 0.98), rgba(11, 15, 23, 0.99));
-      border-top: 1px solid var(--line);
+      padding: 8px 12px;
+      padding-top: calc(8px + env(safe-area-inset-top, 0px));
+      background: linear-gradient(180deg, rgba(11, 15, 23, 0.97) 0%, rgba(11, 15, 23, 0.92) 100%);
+      border-bottom: 1px solid var(--line);
       backdrop-filter: blur(18px);
       -webkit-backdrop-filter: blur(18px);
-      padding: 8px 12px calc(8px + env(safe-area-inset-bottom, 0px)) 12px;
-      gap: 8px;
+    }
+
+    .mobile-nav-inner {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      background: rgba(255, 255, 255, 0.06);
+      border: 1px solid rgba(162, 184, 214, 0.12);
+      border-radius: 10px;
+      padding: 3px;
+      gap: 3px;
     }
 
     .mobile-nav-tab {
-      flex: 1;
+      position: relative;
       display: flex;
       align-items: center;
       justify-content: center;
       gap: 6px;
-      padding: 10px 0;
-      border: 1px solid rgba(162, 184, 214, 0.12);
-      border-radius: 12px;
-      background: rgba(255, 255, 255, 0.03);
+      padding: 8px 0;
+      border: 0;
+      border-radius: 8px;
+      background: transparent;
       color: var(--muted);
       font-size: 13px;
-      font-weight: 700;
-      letter-spacing: 0.02em;
-      transition: background 0.15s ease, color 0.15s ease, border-color 0.15s ease;
+      font-weight: 600;
+      letter-spacing: 0.01em;
+      transition: background 0.2s ease, color 0.2s ease, box-shadow 0.2s ease;
     }
 
     .mobile-nav-tab.active {
-      background: rgba(85, 208, 255, 0.1);
+      background: rgba(85, 208, 255, 0.12);
       color: var(--accent);
-      border-color: rgba(85, 208, 255, 0.25);
+      box-shadow: 0 1px 4px rgba(85, 208, 255, 0.1);
     }
 
     @media (max-width: 720px) {
@@ -753,6 +771,18 @@
 
       .control-header-meta {
         justify-content: flex-start;
+      }
+
+      #agent-control {
+        padding: 14px;
+      }
+
+      .input-area {
+        padding: 10px;
+      }
+
+      #prompt-input {
+        min-height: 80px;
       }
     }
   </style>
@@ -832,8 +862,14 @@
   <div id="agent-world"></div>
 
   <nav id="mobile-nav">
-    <button class="mobile-nav-tab active" data-target="agent-control">Control</button>
-    <button class="mobile-nav-tab" data-target="agent-world">World</button>
+    <div class="mobile-nav-inner">
+      <button class="mobile-nav-tab active" data-target="agent-control">
+        <span>&#9881;</span> Control
+      </button>
+      <button class="mobile-nav-tab" data-target="agent-world">
+        <span>&#9733;</span> Preview
+      </button>
+    </div>
   </nav>
 
   <script type="module">
