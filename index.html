@@ -266,7 +266,7 @@
 
     .input-row {
       display: flex;
-      align-items: flex-end;
+      flex-direction: column;
       gap: 10px;
     }
 
@@ -274,11 +274,10 @@
       display: grid;
       grid-template-columns: 1fr 1fr;
       gap: 10px;
-      flex-shrink: 0;
     }
 
     #prompt-input {
-      min-height: 72px;
+      min-height: 120px;
       resize: vertical;
     }
 
@@ -697,15 +696,6 @@
 
       .control-header-meta {
         justify-content: flex-start;
-      }
-
-      .input-row {
-        align-items: stretch;
-        flex-direction: column;
-      }
-
-      .input-buttons {
-        grid-template-columns: repeat(2, minmax(0, 1fr));
       }
     }
   </style>
@@ -2524,9 +2514,6 @@
       bindEventListeners();
       handleModelInput();
       initSparkles();
-      addLogEntry("status", "Harness ready. The control plane is protected; only #agent-world is mutable.", {
-        label: "status"
-      });
     }
 
     initializeHarness();
