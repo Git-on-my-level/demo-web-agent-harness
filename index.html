@@ -5,6 +5,10 @@
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>Self-Modifying Web Agent Harness</title>
   <style>
+    /* ═══════════════════════════════════════════════════════════
+       RESET / BASE — global tokens, typography, and document-level defaults
+       ═══════════════════════════════════════════════════════════ */
+
     :root {
       color-scheme: dark;
       --bg: #0b0f17;
@@ -41,6 +45,16 @@
       font-family: var(--sans);
     }
 
+    input,
+    textarea,
+    button {
+      font: inherit;
+    }
+
+    /* ═══════════════════════════════════════════════════════════
+       LAYOUT — two-pane layout with a sticky control plane and mutable world
+       ═══════════════════════════════════════════════════════════ */
+
     body {
       display: grid;
       grid-template-columns: minmax(320px, 380px) minmax(0, 1fr);
@@ -59,12 +73,31 @@
       padding: 18px;
       border: 1px solid var(--line);
       border-radius: 24px;
-      background:
-        linear-gradient(180deg, rgba(29, 39, 57, 0.97), rgba(12, 17, 26, 0.98));
+      background: linear-gradient(180deg, rgba(29, 39, 57, 0.97), rgba(12, 17, 26, 0.98));
       box-shadow: var(--shadow);
       overflow: hidden;
       backdrop-filter: blur(18px);
     }
+
+    @media (max-width: 1023px) {
+      body {
+        grid-template-columns: 1fr;
+      }
+
+      #agent-control {
+        position: static;
+        height: auto;
+        max-height: none;
+      }
+
+      #agent-world {
+        min-height: 60vh;
+      }
+    }
+
+    /* ═══════════════════════════════════════════════════════════
+       CONTROL PANEL — protected sidebar inputs, actions, and header styling
+       ═══════════════════════════════════════════════════════════ */
 
     .control-header {
       display: grid;
@@ -120,50 +153,6 @@
       line-height: 1.5;
     }
 
-    .status-row {
-      display: flex;
-      justify-content: space-between;
-      align-items: center;
-      gap: 12px;
-      padding: 10px 14px;
-      border: 1px solid var(--line);
-      border-radius: 14px;
-      background: rgba(255, 255, 255, 0.02);
-    }
-
-    .status-label {
-      color: var(--muted);
-      font-size: 13px;
-    }
-
-    .status-pill {
-      padding: 5px 10px;
-      border-radius: 999px;
-      background: rgba(85, 208, 255, 0.12);
-      color: var(--accent);
-      font-size: 11px;
-      font-weight: 600;
-      text-transform: uppercase;
-      letter-spacing: 0.04em;
-    }
-
-    .status-pill.running {
-      background: rgba(97, 240, 194, 0.14);
-      color: var(--accent-2);
-      animation: statusPulse 1.5s ease-in-out infinite;
-    }
-
-    @keyframes statusPulse {
-      0%, 100% { box-shadow: 0 0 0 0 rgba(97, 240, 194, 0.3); }
-      50% { box-shadow: 0 0 0 6px rgba(97, 240, 194, 0); }
-    }
-
-    .status-pill.error,
-    .status-pill.interrupted {
-      background: rgba(255, 121, 121, 0.14);
-      color: #ffb0b0;
-    }
-
     .model-badge {
       display: inline-flex;
       align-items: center;
@@ -197,12 +186,6 @@
       font-weight: 600;
       color: #c8d5ef;
       letter-spacing: 0.02em;
-    }
-
-    input,
-    textarea,
-    button {
-      font: inherit;
     }
 
     input,
@@ -267,11 +250,11 @@
     }
 
     #submit-button {
+      position: relative;
+      overflow: hidden;
       background: linear-gradient(135deg, #55d0ff 0%, #4f7cff 100%);
       color: #081019;
       box-shadow: 0 8px 20px rgba(79, 124, 255, 0.25);
-      position: relative;
-      overflow: hidden;
     }
 
     #submit-button.running {
@@ -285,13 +268,8 @@
       left: -100%;
       width: 100%;
       height: 100%;
-      background: linear-gradient(90deg, transparent, rgba(255,255,255,0.15), transparent);
+      background: linear-gradient(90deg, transparent, rgba(255, 255, 255, 0.15), transparent);
       animation: submitShimmer 1.8s ease-in-out infinite;
-    }
-
-    @keyframes submitShimmer {
-      0% { left: -100%; }
-      100% { left: 100%; }
     }
 
     #stop-button {
@@ -299,6 +277,15 @@
       color: white;
       box-shadow: 0 8px 20px rgba(219, 74, 74, 0.2);
     }
+
+    @keyframes submitShimmer {
+      0% { left: -100%; }
+      100% { left: 100%; }
+    }
+
+    /* ═══════════════════════════════════════════════════════════
+       OUTPUT LOG — structured transcript for user, tools, and runtime events
+       ═══════════════════════════════════════════════════════════ */
 
     .log-panel {
       min-height: 0;
@@ -391,8 +378,7 @@
 
     .log-entry.tool {
       border-color: rgba(255, 204, 102, 0.28);
-      background:
-        linear-gradient(180deg, rgba(255, 204, 102, 0.12), rgba(255, 204, 102, 0.05));
+      background: linear-gradient(180deg, rgba(255, 204, 102, 0.12), rgba(255, 204, 102, 0.05));
       box-shadow: inset 0 0 0 1px rgba(255, 204, 102, 0.08);
     }
 
@@ -414,13 +400,13 @@
     }
 
     .log-kind {
+      display: flex;
+      align-items: center;
+      gap: 6px;
       font-size: 11px;
       font-weight: 700;
       letter-spacing: 0.05em;
       text-transform: uppercase;
-      display: flex;
-      align-items: center;
-      gap: 6px;
     }
 
     .log-kind-icon {
@@ -493,12 +479,12 @@
       animation: typingBounce 1.2s ease-in-out infinite;
     }
 
-    .typing-indicator .dot:nth-child(2) { animation-delay: 0.15s; }
-    .typing-indicator .dot:nth-child(3) { animation-delay: 0.3s; }
+    .typing-indicator .dot:nth-child(2) {
+      animation-delay: 0.15s;
+    }
 
-    @keyframes typingBounce {
-      0%, 60%, 100% { opacity: 0.3; transform: translateY(0); }
-      30% { opacity: 1; transform: translateY(-4px); }
+    .typing-indicator .dot:nth-child(3) {
+      animation-delay: 0.3s;
     }
 
     .tool-details {
@@ -577,36 +563,78 @@
       white-space: pre-wrap;
     }
 
+    @keyframes typingBounce {
+      0%, 60%, 100% { opacity: 0.3; transform: translateY(0); }
+      30% { opacity: 1; transform: translateY(-4px); }
+    }
+
+    /* ═══════════════════════════════════════════════════════════
+       WORLD CONTAINER — immutable frame around the agent-controlled world pane
+       ═══════════════════════════════════════════════════════════ */
+
     #agent-world {
       min-width: 0;
       min-height: calc(100vh - 40px);
       border: 1px solid rgba(255, 255, 255, 0.08);
       border-radius: 24px;
-      background:
-        linear-gradient(180deg, rgba(255, 255, 255, 0.9), rgba(243, 246, 255, 0.96));
+      background: linear-gradient(180deg, rgba(255, 255, 255, 0.9), rgba(243, 246, 255, 0.96));
       overflow: hidden;
       box-shadow: var(--shadow);
     }
 
-    @media (max-width: 1023px) {
-      body {
-        grid-template-columns: 1fr;
-      }
+    /* ═══════════════════════════════════════════════════════════
+       STATUS INDICATORS — runtime state pill styles for idle/running/interrupted
+       ═══════════════════════════════════════════════════════════ */
 
-      #agent-control {
-        position: static;
-        height: auto;
-        max-height: none;
-      }
+    .status-row {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      gap: 12px;
+      padding: 10px 14px;
+      border: 1px solid var(--line);
+      border-radius: 14px;
+      background: rgba(255, 255, 255, 0.02);
+    }
 
-      #agent-world {
-        min-height: 60vh;
-      }
+    .status-label {
+      color: var(--muted);
+      font-size: 13px;
+    }
+
+    .status-pill {
+      padding: 5px 10px;
+      border-radius: 999px;
+      background: rgba(85, 208, 255, 0.12);
+      color: var(--accent);
+      font-size: 11px;
+      font-weight: 600;
+      text-transform: uppercase;
+      letter-spacing: 0.04em;
+    }
+
+    .status-pill.running {
+      background: rgba(97, 240, 194, 0.14);
+      color: var(--accent-2);
+      animation: statusPulse 1.5s ease-in-out infinite;
+    }
+
+    .status-pill.error,
+    .status-pill.interrupted {
+      background: rgba(255, 121, 121, 0.14);
+      color: #ffb0b0;
+    }
+
+    @keyframes statusPulse {
+      0%, 100% { box-shadow: 0 0 0 0 rgba(97, 240, 194, 0.3); }
+      50% { box-shadow: 0 0 0 6px rgba(97, 240, 194, 0); }
     }
   </style>
 </head>
 <body>
+  <!-- CONTROL PANEL — protected inputs, status, and execution transcript -->
   <div id="agent-control">
+    <!-- Header: explains the fixed control plane and shows the active model badge. -->
     <div class="control-header">
       <div class="eyebrow">Protected Control Plane</div>
       <div class="control-title-row">
@@ -617,6 +645,7 @@
       <div class="model-badge" id="model-badge">glm-5.1</div>
     </div>
 
+    <!-- Runtime status: mirrors the current state of the agent loop. -->
     <div class="status-row">
       <div>
         <div class="status-label">Runtime status</div>
@@ -624,6 +653,7 @@
       <div class="status-pill idle" id="runtime-status">Idle</div>
     </div>
 
+    <!-- Inputs and actions: API credentials, model/endpoint selection, prompt, and run controls. -->
     <div class="field-grid">
       <div class="field">
         <label for="api-key">API Key</label>
@@ -651,6 +681,7 @@
       </div>
     </div>
 
+    <!-- Output log: captures conversation messages, tool calls, and guardrail violations. -->
     <div class="log-panel">
       <div class="log-panel-header">
         <h2>Output Log</h2>
@@ -663,11 +694,21 @@
     </div>
   </div>
 
+  <!-- MUTABLE WORLD — the only region the agent is allowed to replace or inspect -->
   <div id="agent-world">
+    <!-- Initial world stylesheet: default retro mock content before any tool calls run. -->
     <style data-agent-style="active">
+      /* ═══════════════════════════════════════════════════════════
+         RETRO THEME — default MySpace-style demo content for the mutable world
+         ═══════════════════════════════════════════════════════════ */
+
       #agent-world {
         color: #111;
       }
+
+      /* ═══════════════════════════════════════════════════════════
+         ANIMATIONS — page chrome, sparkles, marquee, and nostalgic flourishes
+         ═══════════════════════════════════════════════════════════ */
 
       @keyframes sparkleFloat {
         0%, 100% { opacity: 0; transform: translateY(0) scale(0.5); }
@@ -703,6 +744,10 @@
         0%, 100% { box-shadow: 0 0 8px rgba(255, 0, 200, 0.4), 0 0 20px rgba(255, 0, 200, 0.2); }
         50% { box-shadow: 0 0 16px rgba(255, 0, 200, 0.7), 0 0 40px rgba(255, 0, 200, 0.4); }
       }
+
+      /* ═══════════════════════════════════════════════════════════
+         PAGE SHELL — overall page framing, banner, marquee, and layout grid
+         ═══════════════════════════════════════════════════════════ */
 
       #agent-world .retro-page {
         min-height: 100%;
@@ -750,15 +795,14 @@
       }
 
       #agent-world .retro-banner {
+        position: relative;
         padding: 20px 22px;
         color: #fff;
-        background:
-          linear-gradient(90deg, #ff00c8, #ff5db8, #7348ff, #27b3ff, #00ff88, #ff00c8);
+        background: linear-gradient(90deg, #ff00c8, #ff5db8, #7348ff, #27b3ff, #00ff88, #ff00c8);
         background-size: 300% 100%;
         animation: gradientShift 6s ease infinite;
         border-bottom: 5px solid #ffef7a;
         text-align: center;
-        position: relative;
       }
 
       #agent-world .retro-banner h2,
@@ -767,30 +811,30 @@
       }
 
       #agent-world .retro-banner h2 {
+        display: inline-block;
         font-size: 36px;
         text-shadow:
           3px 3px 0 #4a178d,
           -1px -1px 0 #ff00c8,
           0 0 20px rgba(255, 255, 255, 0.5);
         animation: rainbowShift 4s linear infinite;
-        display: inline-block;
       }
 
       #agent-world .retro-banner p {
         margin-top: 8px;
         font-size: 13px;
-        text-shadow: 1px 1px 0 rgba(0,0,0,0.4);
+        text-shadow: 1px 1px 0 rgba(0, 0, 0, 0.4);
       }
 
       #agent-world .marquee-bar {
+        position: relative;
+        z-index: 1;
         padding: 8px 0;
         background: linear-gradient(90deg, #ff00c8, #7348ff, #00ff88, #ff00c8);
         background-size: 300% 100%;
         animation: gradientShift 4s ease infinite;
         overflow: hidden;
         white-space: nowrap;
-        position: relative;
-        z-index: 1;
       }
 
       #agent-world .marquee-text {
@@ -799,11 +843,13 @@
         color: #fff;
         font-size: 14px;
         font-weight: bold;
-        text-shadow: 1px 1px 0 rgba(0,0,0,0.4);
+        text-shadow: 1px 1px 0 rgba(0, 0, 0, 0.4);
         letter-spacing: 0.05em;
       }
 
       #agent-world .visitor-counter {
+        position: relative;
+        z-index: 1;
         text-align: center;
         padding: 10px;
         background: #000;
@@ -812,36 +858,34 @@
         font-size: 13px;
         font-weight: bold;
         letter-spacing: 0.1em;
-        position: relative;
-        z-index: 1;
         border-top: 2px solid #333;
         border-bottom: 2px solid #333;
       }
 
       #agent-world .visitor-counter .counter-digits {
         display: inline-block;
-        background: #111;
+        margin-left: 6px;
         padding: 4px 12px;
         border: 2px inset #444;
+        background: #111;
         color: #00ff00;
         font-size: 16px;
         letter-spacing: 0.15em;
-        margin-left: 6px;
       }
 
       #agent-world .retro-grid {
+        position: relative;
+        z-index: 1;
         display: grid;
         grid-template-columns: 300px minmax(0, 1fr);
         gap: 16px;
         padding: 16px;
-        position: relative;
-        z-index: 1;
       }
 
       #agent-world .retro-card {
         border: 3px solid #244db7;
         background: #fdfdfd;
-        box-shadow: 3px 3px 0 rgba(0,0,0,0.15);
+        box-shadow: 3px 3px 0 rgba(0, 0, 0, 0.15);
       }
 
       #agent-world .retro-card h3 {
@@ -852,12 +896,16 @@
         background: linear-gradient(180deg, #3c7cff 0%, #0b43b6 100%);
         text-transform: uppercase;
         letter-spacing: 0.06em;
-        text-shadow: 1px 1px 0 rgba(0,0,0,0.3);
+        text-shadow: 1px 1px 0 rgba(0, 0, 0, 0.3);
       }
 
       #agent-world .retro-card-body {
         padding: 14px;
       }
+
+      /* ═══════════════════════════════════════════════════════════
+         PROFILE COLUMN — avatar, mood, stats, and top-friends widgets
+         ═══════════════════════════════════════════════════════════ */
 
       #agent-world .profile-box {
         display: grid;
@@ -878,7 +926,7 @@
         font-size: 13px;
         text-align: center;
         animation: glowPulse 2s ease-in-out infinite;
-        text-shadow: 1px 1px 2px rgba(0,0,0,0.5);
+        text-shadow: 1px 1px 2px rgba(0, 0, 0, 0.5);
       }
 
       #agent-world .tagline {
@@ -931,7 +979,7 @@
         background: #fff9d5;
         text-align: center;
         font-size: 11px;
-        box-shadow: 2px 2px 0 rgba(0,0,0,0.08);
+        box-shadow: 2px 2px 0 rgba(0, 0, 0, 0.08);
         transition: transform 0.15s ease;
       }
 
@@ -950,8 +998,8 @@
         font-weight: bold;
         font-size: 13px;
         color: #fff;
-        text-shadow: 1px 1px 0 rgba(0,0,0,0.3);
-        box-shadow: 2px 2px 4px rgba(0,0,0,0.15);
+        text-shadow: 1px 1px 0 rgba(0, 0, 0, 0.3);
+        box-shadow: 2px 2px 4px rgba(0, 0, 0, 0.15);
       }
 
       #agent-world .friend:nth-child(1) .friend-avatar { background: linear-gradient(135deg, #ff00c8, #ff5db8); }
@@ -964,6 +1012,57 @@
       #agent-world .friend:nth-child(8) .friend-avatar { background: linear-gradient(135deg, #ffcc00, #ff0066); }
       #agent-world .friend:nth-child(9) .friend-avatar { background: linear-gradient(135deg, #66ff00, #00ccff); }
       #agent-world .friend:nth-child(10) .friend-avatar { background: linear-gradient(135deg, #ff00ff, #00ffff); }
+
+      #agent-world .meet-section {
+        padding: 12px;
+        border: 2px solid #00ff88;
+        background: linear-gradient(135deg, #f0fff4, #e6ffe6);
+        font-size: 13px;
+        line-height: 1.6;
+      }
+
+      #agent-world .meet-section ul {
+        margin: 8px 0 0;
+        padding-left: 18px;
+      }
+
+      #agent-world .meet-section li {
+        margin-bottom: 4px;
+      }
+
+      /* ═══════════════════════════════════════════════════════════
+         CONTENT COLUMN — about box, stamps, and decorative music player
+         ═══════════════════════════════════════════════════════════ */
+
+      #agent-world .about-copy {
+        line-height: 1.7;
+        font-size: 14px;
+      }
+
+      #agent-world .hero-box {
+        margin-bottom: 14px;
+        padding: 14px;
+        border: 3px dashed #ff7dd0;
+        background: linear-gradient(135deg, #fff0fa, #ffe6f7);
+        text-shadow: 0 0 1px rgba(255, 0, 200, 0.1);
+      }
+
+      #agent-world .stamp-row {
+        display: flex;
+        gap: 8px;
+        flex-wrap: wrap;
+        margin-top: 14px;
+      }
+
+      #agent-world .stamp {
+        padding: 6px 10px;
+        border: 2px solid #0b43b6;
+        background: linear-gradient(180deg, #fff 0%, #dfe8ff 100%);
+        font-size: 11px;
+        font-weight: bold;
+        color: #b0127e;
+        box-shadow: 2px 2px 0 rgba(0, 0, 0, 0.1);
+      }
 
       #agent-world .music-player {
         display: grid;
@@ -1034,59 +1133,16 @@
         font-weight: bold;
         font-size: 12px;
         cursor: pointer;
-        box-shadow: 1px 1px 0 rgba(0,0,0,0.15);
+        box-shadow: 1px 1px 0 rgba(0, 0, 0, 0.15);
       }
 
       #agent-world .player-controls button:active {
         border-style: inset;
       }
 
-      #agent-world .about-copy {
-        line-height: 1.7;
-        font-size: 14px;
-      }
-
-      #agent-world .hero-box {
-        border: 3px dashed #ff7dd0;
-        padding: 14px;
-        background: linear-gradient(135deg, #fff0fa, #ffe6f7);
-        margin-bottom: 14px;
-        text-shadow: 0 0 1px rgba(255, 0, 200, 0.1);
-      }
-
-      #agent-world .stamp-row {
-        display: flex;
-        gap: 8px;
-        flex-wrap: wrap;
-        margin-top: 14px;
-      }
-
-      #agent-world .stamp {
-        padding: 6px 10px;
-        border: 2px solid #0b43b6;
-        background: linear-gradient(180deg, #fff 0%, #dfe8ff 100%);
-        font-size: 11px;
-        font-weight: bold;
-        color: #b0127e;
-        box-shadow: 2px 2px 0 rgba(0,0,0,0.1);
-      }
-
-      #agent-world .meet-section {
-        padding: 12px;
-        border: 2px solid #00ff88;
-        background: linear-gradient(135deg, #f0fff4, #e6ffe6);
-        font-size: 13px;
-        line-height: 1.6;
-      }
-
-      #agent-world .meet-section ul {
-        margin: 8px 0 0;
-        padding-left: 18px;
-      }
-
-      #agent-world .meet-section li {
-        margin-bottom: 4px;
-      }
+      /* ═══════════════════════════════════════════════════════════
+         RESPONSIVE — collapse the world grid on smaller screens
+         ═══════════════════════════════════════════════════════════ */
 
       @media (max-width: 860px) {
         #agent-world .retro-grid {
@@ -1095,9 +1151,12 @@
       }
     </style>
 
+    <!-- Initial retro page markup: intentionally loud so tool effects are easy to demo. -->
     <div class="retro-page">
+      <!-- Decorative particle layer: populated at startup by initSparkles(). -->
       <div class="sparkle-layer" id="sparkle-layer"></div>
 
+      <!-- Main shell: banner, marquee, visitor counter, and two content columns. -->
       <div class="retro-shell">
         <div class="retro-banner">
           <h2>xX_AgentMaster_Xx</h2>
@@ -1106,7 +1165,7 @@
 
         <div class="marquee-bar">
           <span class="marquee-text">
-            &#9733; WELCOME 2 MY PAGE &#9733;  Leave a comment &hearts;  Best viewed on Internet Explorer 6  &#9733;  NEW MUSIC ADDED 03/15/2004  &#9733;  Don't forget to rate my profile!!  &#9733;  If you're reading this you're officially cool &#9733;
+            &#9733; WELCOME 2 MY PAGE &#9733; Leave a comment &hearts; Best viewed on Internet Explorer 6 &#9733; NEW MUSIC ADDED 03/15/2004 &#9733; Don't forget to rate my profile!! &#9733; If you're reading this you're officially cool &#9733;
           </span>
         </div>
 
@@ -1115,6 +1174,7 @@
         </div>
 
         <div class="retro-grid">
+          <!-- Left column: profile summary, friends, and meet-me list. -->
           <div class="retro-column">
             <section class="retro-card">
               <h3>Profile</h3>
@@ -1178,6 +1238,7 @@
             </section>
           </div>
 
+          <!-- Right column: hero copy, decorative badges, and fake music player. -->
           <div class="retro-column">
             <section class="retro-card">
               <h3>About Me</h3>
@@ -1232,6 +1293,10 @@
   </div>
 
   <script>
+    /* ═══════════════════════════════════════════════════════════
+       CONFIGURATION — defaults, prompts, and mutable runtime state
+       ═══════════════════════════════════════════════════════════ */
+
     const SYSTEM_PROMPT = [
       "You are an agent that modifies a web page via tools.",
       "You control ONLY the contents of the element with id=\"agent-world\".",
@@ -1246,6 +1311,18 @@
       "- You may build tools and UI inside the world",
       "Your goal is to iteratively improve the page based on user instructions."
     ].join("\n");
+
+    const DEFAULT_MODEL = "glm-5.1";
+    const DEFAULT_API_ENDPOINT = "https://api.z.ai/api/coding/paas/v4";
+
+    let interrupted = false;
+    let isRunning = false;
+    let conversationHistory = [];
+    let typingIndicator = null;
+
+    /* ═══════════════════════════════════════════════════════════
+       TOOL SCHEMA — function-calling contract exposed to the model
+       ═══════════════════════════════════════════════════════════ */
 
     const TOOL_SCHEMA = [
       {
@@ -1361,11 +1438,9 @@
       }
     ];
 
-    let interrupted = false;
-    let isRunning = false;
-    let conversationHistory = [];
-    const DEFAULT_MODEL = "glm-5.1";
-    const DEFAULT_API_ENDPOINT = "https://api.z.ai/api/coding/paas/v4";
+    /* ═══════════════════════════════════════════════════════════
+       DOM REFERENCES — all fixed control-plane lookups live in one place
+       ═══════════════════════════════════════════════════════════ */
 
     const outputLog = document.getElementById("output-log");
     const runtimeStatus = document.getElementById("runtime-status");
@@ -1379,10 +1454,22 @@
     const modelBadge = document.getElementById("model-badge");
     const clearLogBtn = document.getElementById("clear-log-btn");
 
+    /* ═══════════════════════════════════════════════════════════
+       UTILITY FUNCTIONS — small helpers for status, logging, and formatting
+       ═══════════════════════════════════════════════════════════ */
+
+    /**
+     * Returns the selected model, falling back to the default if the field is blank.
+     * @returns {string}
+     */
     function getSelectedModel() {
       return modelInput.value.trim() || DEFAULT_MODEL;
     }
 
+    /**
+     * Normalizes the endpoint so the fetch call always targets `/chat/completions`.
+     * @returns {string}
+     */
     function getApiEndpoint() {
       const raw = apiEndpointInput.value.trim() || DEFAULT_API_ENDPOINT;
       return /\/chat\/completions\/?$/.test(raw)
@@ -1390,14 +1477,10 @@
         : raw.replace(/\/+$/, "") + "/chat/completions";
     }
 
-    modelInput.addEventListener("input", function() {
-      modelBadge.textContent = getSelectedModel();
-    });
-
-    clearLogBtn.addEventListener("click", function() {
-      outputLog.innerHTML = "";
-    });
-
+    /**
+     * Produces a short timestamp for log entries.
+     * @returns {string}
+     */
     function timestamp() {
       return new Date().toLocaleTimeString([], {
         hour: "2-digit",
@@ -1406,25 +1489,45 @@
       });
     }
 
+    /**
+     * Updates the runtime status pill text and visual state.
+     * @param {string} label
+     * @param {string} className
+     * @returns {void}
+     */
     function setStatus(label, className) {
       runtimeStatus.textContent = label;
       runtimeStatus.className = "status-pill " + className;
     }
 
+    /**
+     * Keeps the newest transcript entry visible.
+     * @returns {void}
+     */
     function scrollLogToBottom() {
       outputLog.scrollTop = outputLog.scrollHeight;
     }
 
+    /**
+     * Appends a prepared log node and scrolls the transcript.
+     * @param {HTMLElement} entry
+     * @returns {HTMLElement}
+     */
     function appendLogEntry(entry) {
       outputLog.appendChild(entry);
       scrollLogToBottom();
       return entry;
     }
 
-    var typingIndicator = null;
-
+    /**
+     * Adds the animated typing indicator while an LLM request is in flight.
+     * @returns {void}
+     */
     function showTypingIndicator() {
-      if (typingIndicator) return;
+      if (typingIndicator) {
+        return;
+      }
+
       typingIndicator = document.createElement("div");
       typingIndicator.className = "typing-indicator";
       typingIndicator.innerHTML = '<div class="dot"></div><div class="dot"></div><div class="dot"></div>';
@@ -1432,6 +1535,10 @@
       scrollLogToBottom();
     }
 
+    /**
+     * Removes the typing indicator if it is currently visible.
+     * @returns {void}
+     */
     function hideTypingIndicator() {
       if (typingIndicator && typingIndicator.parentNode) {
         typingIndicator.parentNode.removeChild(typingIndicator);
@@ -1439,8 +1546,13 @@
       typingIndicator = null;
     }
 
+    /**
+     * Maps each transcript entry kind to a small icon.
+     * @param {string} kind
+     * @returns {string}
+     */
     function getKindIcon(kind) {
-      var icons = {
+      const icons = {
         user: "\u2709",
         assistant: "\u2726",
         tool: "\u2699",
@@ -1450,6 +1562,13 @@
       return icons[kind] || "\u25CF";
     }
 
+    /**
+     * Adds a formatted transcript entry for plain user/assistant/status/error messages.
+     * @param {string} kind
+     * @param {string} content
+     * @param {{label?: string, summary?: string, details?: string, open?: boolean}} [options={}]
+     * @returns {HTMLElement}
+     */
     function addLogEntry(kind, content, options = {}) {
       hideTypingIndicator();
 
@@ -1462,11 +1581,11 @@
       const label = document.createElement("div");
       label.className = "log-kind";
 
-      var icon = document.createElement("span");
+      const icon = document.createElement("span");
       icon.className = "log-kind-icon";
       icon.textContent = getKindIcon(options.label || kind);
 
-      var labelText = document.createElement("span");
+      const labelText = document.createElement("span");
       labelText.textContent = options.label || kind;
 
       label.appendChild(icon);
@@ -1507,6 +1626,12 @@
       return appendLogEntry(entry);
     }
 
+    /**
+     * Logs the full argument payload for a tool request.
+     * @param {string} name
+     * @param {object} args
+     * @returns {void}
+     */
     function logToolCall(name, args) {
       hideTypingIndicator();
 
@@ -1556,6 +1681,8 @@
       const lineCount = argText.split("\n").length;
       const details = document.createElement("details");
       details.className = "tool-details";
+
+      // Keep short payloads expanded, but collapse long ones so the demo transcript stays scannable.
       details.open = lineCount <= 14 && argText.length <= 700;
 
       const summary = document.createElement("summary");
@@ -1580,12 +1707,23 @@
       appendLogEntry(entry);
     }
 
+    /**
+     * Records the textual result of a tool execution.
+     * @param {string} name
+     * @param {string} result
+     * @returns {void}
+     */
     function logToolResult(name, result) {
       addLogEntry("status", result, {
         label: name + " result"
       });
     }
 
+    /**
+     * Safely serializes arbitrary values for log and tool messages.
+     * @param {*} value
+     * @returns {string}
+     */
     function safeJSONStringify(value) {
       try {
         return JSON.stringify(value, null, 2);
@@ -1594,8 +1732,12 @@
       }
     }
 
+    /**
+     * Returns the mutable world's active style element, creating it if needed.
+     * @returns {HTMLStyleElement}
+     */
     function getWorldStyleElement() {
-      let styleEl = agentWorld.querySelector("style[data-agent-style=\"active\"]");
+      let styleEl = agentWorld.querySelector('style[data-agent-style="active"]');
       if (!styleEl) {
         styleEl = document.createElement("style");
         styleEl.setAttribute("data-agent-style", "active");
@@ -1604,15 +1746,34 @@
       return styleEl;
     }
 
+    /**
+     * Replaces the active mutable-world stylesheet with the supplied CSS.
+     * @param {string} css
+     * @returns {void}
+     */
     function upsertWorldStyle(css) {
       const styleEl = getWorldStyleElement();
       styleEl.textContent = typeof css === "string" ? css : "";
     }
 
+    /* ═══════════════════════════════════════════════════════════
+       GUARDRAILS — reject tool calls that try to escape the mutable world
+       ═══════════════════════════════════════════════════════════ */
+
+    /**
+     * Detects obvious attempts to modify the protected control plane through HTML.
+     * @param {string} html
+     * @returns {boolean}
+     */
     function containsForbiddenHtml(html) {
       return typeof html === "string" && html.toLowerCase().includes("agent-control");
     }
 
+    /**
+     * Detects JavaScript that reaches outside the mutable world or overwrites core runtime hooks.
+     * @param {string} js
+     * @returns {boolean}
+     */
     function containsForbiddenJs(js) {
       if (typeof js !== "string" || js.trim() === "") {
         return false;
@@ -1630,6 +1791,12 @@
       return forbiddenPatterns.some((pattern) => pattern.test(js));
     }
 
+    /**
+     * Throws when a tool call attempts to mutate protected parts of the app.
+     * @param {string} toolName
+     * @param {object} args
+     * @returns {void}
+     */
     function validateToolCall(toolName, args) {
       const html = args && typeof args.html === "string" ? args.html : "";
       const js = args && typeof args.js === "string" ? args.js : "";
@@ -1647,13 +1814,22 @@
       }
     }
 
+    /* ═══════════════════════════════════════════════════════════
+       TOOL EXECUTION — runtime implementation for all six mutable-world tools
+       ═══════════════════════════════════════════════════════════ */
+
+    /**
+     * Executes world-scoped JavaScript and reports any runtime errors as tool output.
+     * @param {string} js
+     * @returns {string}
+     */
     function executeWorldJs(js) {
       if (typeof js !== "string" || js.trim() === "") {
         return "No JavaScript executed.";
       }
 
       try {
-        const runner = new Function("\"use strict\";\n" + js);
+        const runner = new Function('"use strict";\n' + js);
         runner();
         return "JavaScript executed.";
       } catch (error) {
@@ -1663,6 +1839,11 @@
       }
     }
 
+    /**
+     * Applies a parsed tool call against the mutable world.
+     * @param {{name: string, args: object}} call
+     * @returns {string}
+     */
     function applyTool(call) {
       if (interrupted) {
         throw new Error("Interrupted");
@@ -1683,39 +1864,49 @@
           const jsResult = executeWorldJs(js);
           return "World replaced. CSS updated. " + jsResult;
         }
+
         case "append_html": {
           const html = typeof args.html === "string" ? args.html : "";
           agentWorld.insertAdjacentHTML("beforeend", html);
           return "HTML appended.";
         }
+
         case "set_css": {
           const css = typeof args.css === "string" ? args.css : "";
           upsertWorldStyle(css);
           return "CSS updated.";
         }
+
         case "run_js": {
           const js = typeof args.js === "string" ? args.js : "";
           return executeWorldJs(js);
         }
+
         case "read_world": {
-          const worldEl = document.getElementById("agent-world");
-          const result = worldEl ? worldEl.innerHTML : "<empty>";
-          return result;
+          return agentWorld ? agentWorld.innerHTML : "<empty>";
         }
+
         case "verify_world": {
-          const worldEl = document.getElementById("agent-world");
-          if (!worldEl) return "<empty>";
-          const selector = call.args && typeof call.args.selector === "string" ? call.args.selector : "";
+          if (!agentWorld) {
+            return "<empty>";
+          }
+
+          const selector = args && typeof args.selector === "string" ? args.selector : "";
+
           if (selector) {
-            const el = worldEl.querySelector(selector);
-            if (!el) return "Element not found: " + selector;
-            const computed = window.getComputedStyle(el);
+            const element = agentWorld.querySelector(selector);
+            if (!element) {
+              return "Element not found: " + selector;
+            }
+
+            const computed = window.getComputedStyle(element);
             return JSON.stringify({
-              tag: el.tagName,
-              id: el.id,
-              className: el.className,
-              textContent: el.textContent ? el.textContent.substring(0, 500) : "",
-              innerHTML: el.innerHTML ? el.innerHTML.substring(0, 2000) : "",
+              tag: element.tagName,
+              id: element.id,
+              className: element.className,
+              // Truncate large payloads so verification stays readable in the UI and model context.
+              textContent: element.textContent ? element.textContent.substring(0, 500) : "",
+              innerHTML: element.innerHTML ? element.innerHTML.substring(0, 2000) : "",
               computedStyles: {
                 display: computed.display,
                 color: computed.color,
@@ -1725,17 +1916,28 @@
               }
             }, null, 2);
           }
+
           return JSON.stringify({
-            childCount: worldEl.children.length,
-            textLength: worldEl.textContent ? worldEl.textContent.length : 0,
-            innerHTML_preview: worldEl.innerHTML ? worldEl.innerHTML.substring(0, 3000) : ""
+            childCount: agentWorld.children.length,
+            textLength: agentWorld.textContent ? agentWorld.textContent.length : 0,
+            innerHTML_preview: agentWorld.innerHTML ? agentWorld.innerHTML.substring(0, 3000) : ""
           }, null, 2);
         }
+
         default:
           throw new Error("Unknown tool: " + toolName);
       }
     }
 
+    /* ═══════════════════════════════════════════════════════════
+       LLM COMMUNICATION — API request/response handling and provider normalization
+       ═══════════════════════════════════════════════════════════ */
+
+    /**
+     * Sends the current conversation to the LLM endpoint and returns a normalized transport envelope.
+     * @param {Array<object>} messages
+     * @returns {Promise<{ok: boolean, payload?: object, rawText?: string, error?: string}>}
+     */
     async function callLLM(messages) {
       const apiKey = apiKeyInput.value.trim();
       const model = getSelectedModel();
@@ -1744,8 +1946,6 @@
       if (!apiKey) {
         throw new Error("API key is required.");
       }
-
-      let responseText = "";
 
       const response = await fetch(endpoint, {
         method: "POST",
@@ -1764,7 +1964,7 @@
         })
       });
 
-      responseText = await response.text();
+      const responseText = await response.text();
 
       let data;
       try {
@@ -1793,6 +1993,11 @@
       };
     }
 
+    /**
+     * Converts provider-specific content arrays into plain text.
+     * @param {string|Array<object>} content
+     * @returns {string}
+     */
     function contentPartsToText(content) {
       if (typeof content === "string") {
         return content;
@@ -1816,6 +2021,11 @@
       }).filter(Boolean).join("\n");
     }
 
+    /**
+     * Extracts the assistant message regardless of which OpenAI-compatible envelope the provider returns.
+     * @param {{payload?: object}} result
+     * @returns {object|null}
+     */
     function extractMessageEnvelope(result) {
       if (!result || !result.payload) {
         return null;
@@ -1833,6 +2043,11 @@
       return null;
     }
 
+    /**
+     * Normalizes provider response shapes into assistant text plus parsed tool-call metadata.
+     * @param {{payload?: object, rawText?: string}} result
+     * @returns {{text: string, toolCalls: Array<object>, rawAssistant: string, originalMessage: object|null}}
+     */
     function normalizeAssistantReply(result) {
       const message = extractMessageEnvelope(result);
       const rawPayload = result && result.payload ? result.payload : null;
@@ -1872,6 +2087,11 @@
       };
     }
 
+    /**
+     * Parses a tool-call argument payload whether the provider sends it as an object or JSON string.
+     * @param {object|string} rawArgs
+     * @returns {{ok: boolean, value?: object, error?: string}}
+     */
     function parseToolArguments(rawArgs) {
       if (rawArgs && typeof rawArgs === "object") {
         return { ok: true, value: rawArgs };
@@ -1899,6 +2119,14 @@
       }
     }
 
+    /* ═══════════════════════════════════════════════════════════
+       AGENT LOOP — conversation state, tool execution, and stop handling
+       ═══════════════════════════════════════════════════════════ */
+
+    /**
+     * Runs the request/tool loop until the assistant answers normally, errors, or the user interrupts.
+     * @returns {Promise<void>}
+     */
     async function agentLoop() {
       interrupted = false;
       isRunning = true;
@@ -1914,6 +2142,7 @@
           const response = await callLLM(conversationHistory);
           hideTypingIndicator();
 
+          // Check again after the await because Stop can be pressed while the network request is in flight.
           if (interrupted) {
             break;
           }
@@ -1930,6 +2159,7 @@
           const assistantReply = normalizeAssistantReply(response);
 
           if (assistantReply.toolCalls.length > 0) {
+            // Preserve the original tool-call envelope so the next model turn can reconcile tool_call_id values.
             const assistantHistoryEntry = {
               role: "assistant",
               content: assistantReply.text || "",
@@ -1950,7 +2180,7 @@
               addLogEntry("assistant", assistantReply.text, { label: "assistant" });
             }
 
-            let parsedCalls = [];
+            const parsedCalls = [];
             let parseFailed = false;
 
             for (const call of assistantReply.toolCalls) {
@@ -1975,6 +2205,7 @@
             }
 
             for (const call of parsedCalls) {
+              // Check before each tool so Stop can halt safely between actions instead of halfway through a batch.
               if (interrupted) {
                 break;
               }
@@ -2028,6 +2259,7 @@
         submitButton.disabled = false;
         submitButton.textContent = "Run Agent";
         submitButton.classList.remove("running");
+
         if (interrupted) {
           setStatus("Interrupted", "interrupted");
           addLogEntry("status", "Interrupted.", { label: "status" });
@@ -2038,7 +2270,31 @@
       }
     }
 
-    submitButton.addEventListener("click", async () => {
+    /* ═══════════════════════════════════════════════════════════
+       UI EVENT HANDLERS — sidebar interactions for running, stopping, and clearing
+       ═══════════════════════════════════════════════════════════ */
+
+    /**
+     * Mirrors the model input into the badge in the control header.
+     * @returns {void}
+     */
+    function handleModelInput() {
+      modelBadge.textContent = getSelectedModel();
+    }
+
+    /**
+     * Clears the transcript without affecting conversation history or world state.
+     * @returns {void}
+     */
+    function handleClearLogClick() {
+      outputLog.innerHTML = "";
+    }
+
+    /**
+     * Queues the user's prompt and starts the agent loop.
+     * @returns {Promise<void>}
+     */
+    async function handleSubmitClick() {
       if (isRunning) {
         addLogEntry("error", "Agent is already running.", { label: "state" });
         return;
@@ -2058,9 +2314,13 @@
       addLogEntry("user", prompt, { label: "user" });
       promptInput.value = "";
       await agentLoop();
-    });
+    }
 
-    stopButton.addEventListener("click", () => {
+    /**
+     * Requests that the current agent loop stop at the next safe boundary.
+     * @returns {void}
+     */
+    function handleStopClick() {
       interrupted = true;
       if (isRunning) {
         hideTypingIndicator();
@@ -2071,34 +2331,73 @@
       } else {
         addLogEntry("status", "Stop requested, but no agent loop is running.", { label: "status" });
       }
-    });
+    }
 
-    promptInput.addEventListener("keydown", (event) => {
+    /**
+     * Lets the user submit with Cmd/Ctrl+Enter from the prompt textarea.
+     * @param {KeyboardEvent} event
+     * @returns {void}
+     */
+    function handlePromptKeydown(event) {
       if ((event.metaKey || event.ctrlKey) && event.key === "Enter") {
         event.preventDefault();
         submitButton.click();
       }
-    });
+    }
 
-    (function initSparkles() {
-      var layer = document.getElementById("sparkle-layer");
-      if (!layer) return;
-      for (var i = 0; i < 30; i++) {
-        var s = document.createElement("div");
-        s.className = "sparkle";
-        s.style.left = (Math.random() * 100) + "%";
-        s.style.top = (Math.random() * 100) + "%";
-        s.style.animationDelay = (Math.random() * 3) + "s";
-        s.style.animationDuration = (2 + Math.random() * 3) + "s";
-        s.style.width = (2 + Math.random() * 4) + "px";
-        s.style.height = s.style.width;
-        layer.appendChild(s);
+    /**
+     * Wires up all control-plane event listeners in one place.
+     * @returns {void}
+     */
+    function bindEventHandlers() {
+      modelInput.addEventListener("input", handleModelInput);
+      clearLogBtn.addEventListener("click", handleClearLogClick);
+      submitButton.addEventListener("click", handleSubmitClick);
+      stopButton.addEventListener("click", handleStopClick);
+      promptInput.addEventListener("keydown", handlePromptKeydown);
+    }
+
+    /* ═══════════════════════════════════════════════════════════
+       INITIALIZATION — startup wiring for the static demo world and transcript
+       ═══════════════════════════════════════════════════════════ */
+
+    /**
+     * Seeds the decorative sparkle layer inside the initial retro world.
+     * @returns {void}
+     */
+    function initSparkles() {
+      const layer = document.getElementById("sparkle-layer");
+      if (!layer) {
+        return;
       }
-    })();
 
-    addLogEntry("status", "Harness ready. The control plane is protected; only #agent-world is mutable.", {
-      label: "status"
-    });
+      for (let index = 0; index < 30; index += 1) {
+        const sparkle = document.createElement("div");
+        sparkle.className = "sparkle";
+        sparkle.style.left = (Math.random() * 100) + "%";
+        sparkle.style.top = (Math.random() * 100) + "%";
+        sparkle.style.animationDelay = (Math.random() * 3) + "s";
+        sparkle.style.animationDuration = (2 + Math.random() * 3) + "s";
+        sparkle.style.width = (2 + Math.random() * 4) + "px";
+        sparkle.style.height = sparkle.style.width;
+        layer.appendChild(sparkle);
+      }
+    }
+
+    /**
+     * Performs one-time startup wiring after the static DOM has loaded.
+     * @returns {void}
+     */
+    function initializeHarness() {
+      bindEventHandlers();
+      handleModelInput();
+      initSparkles();
+      addLogEntry("status", "Harness ready. The control plane is protected; only #agent-world is mutable.", {
+        label: "status"
+      });
+    }
+
+    initializeHarness();
   </script>
 </body>
 </html>
