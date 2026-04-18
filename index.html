@@ -6,9 +6,8 @@
   <title>Self-Modifying Web Agent Harness</title>
   <style>
     /* ═══════════════════════════════════════════════════════════
-       RESET / BASE — global tokens, typography, and document-level defaults
+       RESET/BASE — shared variables, defaults, and element resets
        ═══════════════════════════════════════════════════════════ */
-
     :root {
       color-scheme: dark;
       --bg: #0b0f17;
@@ -45,38 +44,59 @@
       font-family: var(--sans);
     }
 
+    label {
+      font-size: 12px;
+      font-weight: 600;
+      color: #c8d5ef;
+      letter-spacing: 0.02em;
+    }
+
     input,
     textarea,
     button {
       font: inherit;
     }
 
-    /* ═══════════════════════════════════════════════════════════
-       LAYOUT — two-pane layout with a sticky control plane and mutable world
-       ═══════════════════════════════════════════════════════════ */
+    input,
+    textarea {
+      width: 100%;
+      padding: 10px 12px;
+      border: 1px solid rgba(162, 184, 214, 0.18);
+      border-radius: 12px;
+      background: rgba(6, 9, 14, 0.72);
+      color: var(--text);
+      font-size: 13px;
+      transition: border-color 0.2s ease, box-shadow 0.2s ease;
+    }
 
+    input:focus,
+    textarea:focus {
+      outline: none;
+      border-color: var(--line-strong);
+      box-shadow: 0 0 0 3px rgba(85, 208, 255, 0.08);
+    }
+
+    input:hover:not(:focus),
+    textarea:hover:not(:focus) {
+      border-color: rgba(162, 184, 214, 0.28);
+    }
+
+    textarea {
+      min-height: 100px;
+      resize: vertical;
+      line-height: 1.5;
+    }
+
+    /* ═══════════════════════════════════════════════════════════
+       LAYOUT — two-column shell with a sticky control plane
+       ═══════════════════════════════════════════════════════════ */
+    /* The page keeps controls visible while the mutable world occupies
+       the remaining width. On smaller screens it collapses to one column. */
     body {
       display: grid;
       grid-template-columns: minmax(320px, 380px) minmax(0, 1fr);
       gap: 20px;
       padding: 20px;
-    }
-
-    #agent-control {
-      position: sticky;
-      top: 20px;
-      align-self: start;
-      height: calc(100vh - 40px);
-      display: flex;
-      flex-direction: column;
-      gap: 14px;
-      padding: 18px;
-      border: 1px solid var(--line);
-      border-radius: 24px;
-      background: linear-gradient(180deg, rgba(29, 39, 57, 0.97), rgba(12, 17, 26, 0.98));
-      box-shadow: var(--shadow);
-      overflow: hidden;
-      backdrop-filter: blur(18px);
     }
 
     @media (max-width: 1023px) {
@@ -96,8 +116,24 @@
     }
 
     /* ═══════════════════════════════════════════════════════════
-       CONTROL PANEL — protected sidebar inputs, actions, and header styling
+       CONTROL PANEL — protected inputs, buttons, and header chrome
        ═══════════════════════════════════════════════════════════ */
+    #agent-control {
+      position: sticky;
+      top: 20px;
+      align-self: start;
+      height: calc(100vh - 40px);
+      display: flex;
+      flex-direction: column;
+      gap: 14px;
+      padding: 18px;
+      border: 1px solid var(--line);
+      border-radius: 24px;
+      background: linear-gradient(180deg, rgba(29, 39, 57, 0.97), rgba(12, 17, 26, 0.98));
+      box-shadow: var(--shadow);
+      overflow: hidden;
+      backdrop-filter: blur(18px);
+    }
 
     .control-header {
       display: grid;
@@ -181,43 +217,6 @@
       gap: 6px;
     }
 
-    label {
-      font-size: 12px;
-      font-weight: 600;
-      color: #c8d5ef;
-      letter-spacing: 0.02em;
-    }
-
-    input,
-    textarea {
-      width: 100%;
-      padding: 10px 12px;
-      border: 1px solid rgba(162, 184, 214, 0.18);
-      border-radius: 12px;
-      background: rgba(6, 9, 14, 0.72);
-      color: var(--text);
-      font-size: 13px;
-      transition: border-color 0.2s ease, box-shadow 0.2s ease;
-    }
-
-    input:focus,
-    textarea:focus {
-      outline: none;
-      border-color: var(--line-strong);
-      box-shadow: 0 0 0 3px rgba(85, 208, 255, 0.08);
-    }
-
-    input:hover:not(:focus),
-    textarea:hover:not(:focus) {
-      border-color: rgba(162, 184, 214, 0.28);
-    }
-
-    textarea {
-      min-height: 100px;
-      resize: vertical;
-      line-height: 1.5;
-    }
-
     .button-row {
       display: grid;
       grid-template-columns: 1fr 1fr;
@@ -272,21 +271,25 @@
       animation: submitShimmer 1.8s ease-in-out infinite;
     }
 
+    @keyframes submitShimmer {
+      0% {
+        left: -100%;
+      }
+
+      100% {
+        left: 100%;
+      }
+    }
+
     #stop-button {
       background: linear-gradient(135deg, rgba(255, 121, 121, 0.95), rgba(219, 74, 74, 0.95));
-      color: white;
+      color: #fff;
       box-shadow: 0 8px 20px rgba(219, 74, 74, 0.2);
     }
 
-    @keyframes submitShimmer {
-      0% { left: -100%; }
-      100% { left: 100%; }
-    }
-
     /* ═══════════════════════════════════════════════════════════
-       OUTPUT LOG — structured transcript for user, tools, and runtime events
+       OUTPUT LOG — execution transcript, tool payloads, and typing state
        ═══════════════════════════════════════════════════════════ */
-
     .log-panel {
       min-height: 0;
       flex: 1;
@@ -352,12 +355,12 @@
     }
 
     .log-entry {
-      padding: 10px 12px;
-      border-radius: 12px;
-      border: 1px solid rgba(255, 255, 255, 0.06);
-      background: rgba(255, 255, 255, 0.025);
       display: grid;
       gap: 6px;
+      padding: 10px 12px;
+      border: 1px solid rgba(255, 255, 255, 0.06);
+      border-radius: 12px;
+      background: rgba(255, 255, 255, 0.025);
       word-wrap: break-word;
       overflow-wrap: break-word;
     }
@@ -466,8 +469,8 @@
       align-items: center;
       gap: 4px;
       padding: 8px 14px;
-      border-radius: 12px;
       border: 1px solid rgba(97, 240, 194, 0.15);
+      border-radius: 12px;
       background: rgba(97, 240, 194, 0.06);
     }
 
@@ -487,6 +490,20 @@
       animation-delay: 0.3s;
     }
 
+    @keyframes typingBounce {
+      0%,
+      60%,
+      100% {
+        opacity: 0.3;
+        transform: translateY(0);
+      }
+
+      30% {
+        opacity: 1;
+        transform: translateY(-4px);
+      }
+    }
+
     .tool-details {
       border: 1px solid rgba(255, 255, 255, 0.08);
       border-radius: 10px;
@@ -495,15 +512,15 @@
     }
 
     .tool-details summary {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 12px;
       cursor: pointer;
       list-style: none;
       padding: 10px 12px;
       font-size: 12px;
       color: #ffe2a2;
-      display: flex;
-      align-items: center;
-      justify-content: space-between;
-      gap: 12px;
     }
 
     .tool-details summary::-webkit-details-marker {
@@ -527,9 +544,9 @@
       align-items: center;
       gap: 6px;
       padding: 4px 10px;
+      border: 1px solid rgba(255, 204, 102, 0.3);
       border-radius: 999px;
       background: rgba(255, 204, 102, 0.16);
-      border: 1px solid rgba(255, 204, 102, 0.3);
       color: #ffd88a;
       font-size: 12px;
       font-weight: 700;
@@ -563,15 +580,9 @@
       white-space: pre-wrap;
     }
 
-    @keyframes typingBounce {
-      0%, 60%, 100% { opacity: 0.3; transform: translateY(0); }
-      30% { opacity: 1; transform: translateY(-4px); }
-    }
-
     /* ═══════════════════════════════════════════════════════════
-       WORLD CONTAINER — immutable frame around the agent-controlled world pane
+       WORLD CONTAINER — immutable shell around the mutable demo pane
        ═══════════════════════════════════════════════════════════ */
-
     #agent-world {
       min-width: 0;
       min-height: calc(100vh - 40px);
@@ -583,9 +594,508 @@
     }
 
     /* ═══════════════════════════════════════════════════════════
-       STATUS INDICATORS — runtime state pill styles for idle/running/interrupted
+       RETRO THEME — default mutable world seed content and animations
        ═══════════════════════════════════════════════════════════ */
+    #agent-world {
+      color: #111;
+    }
 
+    @keyframes sparkleFloat {
+      0%,
+      100% {
+        opacity: 0;
+        transform: translateY(0) scale(0.5);
+      }
+
+      50% {
+        opacity: 1;
+        transform: translateY(-18px) scale(1);
+      }
+    }
+
+    @keyframes rainbowShift {
+      0% {
+        filter: hue-rotate(0deg);
+      }
+
+      100% {
+        filter: hue-rotate(360deg);
+      }
+    }
+
+    @keyframes gradientShift {
+      0% {
+        background-position: 0% 50%;
+      }
+
+      50% {
+        background-position: 100% 50%;
+      }
+
+      100% {
+        background-position: 0% 50%;
+      }
+    }
+
+    @keyframes marqueeScroll {
+      0% {
+        transform: translateX(100%);
+      }
+
+      100% {
+        transform: translateX(-100%);
+      }
+    }
+
+    @keyframes blink {
+      50% {
+        opacity: 0.2;
+      }
+    }
+
+    @keyframes pulse {
+      0%,
+      100% {
+        transform: scale(1);
+      }
+
+      50% {
+        transform: scale(1.05);
+      }
+    }
+
+    @keyframes glowPulse {
+      0%,
+      100% {
+        box-shadow: 0 0 8px rgba(255, 0, 200, 0.4), 0 0 20px rgba(255, 0, 200, 0.2);
+      }
+
+      50% {
+        box-shadow: 0 0 16px rgba(255, 0, 200, 0.7), 0 0 40px rgba(255, 0, 200, 0.4);
+      }
+    }
+
+    #agent-world .retro-page {
+      position: relative;
+      min-height: 100%;
+      padding: 0;
+      overflow: hidden;
+      background: linear-gradient(135deg, #ff00ff22, #00ffff18, #00ff0012, #ff00ff22);
+      background-size: 400% 400%;
+      animation: gradientShift 12s ease infinite;
+      font-family: "Comic Sans MS", "Chalkboard SE", Verdana, Tahoma, sans-serif;
+    }
+
+    #agent-world .sparkle-layer {
+      position: absolute;
+      top: 0;
+      left: 0;
+      z-index: 0;
+      width: 100%;
+      height: 100%;
+      overflow: hidden;
+      pointer-events: none;
+    }
+
+    #agent-world .sparkle {
+      position: absolute;
+      width: 4px;
+      height: 4px;
+      border-radius: 50%;
+      background: #fff;
+      animation: sparkleFloat 3s ease-in-out infinite;
+    }
+
+    #agent-world .retro-shell {
+      position: relative;
+      z-index: 1;
+      max-width: 1060px;
+      margin: 0 auto;
+      border: 5px ridge #c0c0c0;
+      background: #fff;
+      box-shadow:
+        0 0 0 3px #ff00c8,
+        0 0 0 6px #00ffff,
+        0 0 30px rgba(255, 0, 200, 0.3),
+        0 0 60px rgba(0, 255, 255, 0.15);
+    }
+
+    #agent-world .retro-banner {
+      position: relative;
+      padding: 20px 22px;
+      border-bottom: 5px solid #ffef7a;
+      color: #fff;
+      text-align: center;
+      background: linear-gradient(90deg, #ff00c8, #ff5db8, #7348ff, #27b3ff, #00ff88, #ff00c8);
+      background-size: 300% 100%;
+      animation: gradientShift 6s ease infinite;
+    }
+
+    #agent-world .retro-banner h2,
+    #agent-world .retro-banner p {
+      margin: 0;
+    }
+
+    #agent-world .retro-banner h2 {
+      display: inline-block;
+      font-size: 36px;
+      text-shadow:
+        3px 3px 0 #4a178d,
+        -1px -1px 0 #ff00c8,
+        0 0 20px rgba(255, 255, 255, 0.5);
+      animation: rainbowShift 4s linear infinite;
+    }
+
+    #agent-world .retro-banner p {
+      margin-top: 8px;
+      font-size: 13px;
+      text-shadow: 1px 1px 0 rgba(0, 0, 0, 0.4);
+    }
+
+    #agent-world .marquee-bar {
+      position: relative;
+      z-index: 1;
+      padding: 8px 0;
+      overflow: hidden;
+      white-space: nowrap;
+      background: linear-gradient(90deg, #ff00c8, #7348ff, #00ff88, #ff00c8);
+      background-size: 300% 100%;
+      animation: gradientShift 4s ease infinite;
+    }
+
+    #agent-world .marquee-text {
+      display: inline-block;
+      color: #fff;
+      font-size: 14px;
+      font-weight: 700;
+      letter-spacing: 0.05em;
+      text-shadow: 1px 1px 0 rgba(0, 0, 0, 0.4);
+      animation: marqueeScroll 18s linear infinite;
+    }
+
+    #agent-world .visitor-counter {
+      position: relative;
+      z-index: 1;
+      padding: 10px;
+      border-top: 2px solid #333;
+      border-bottom: 2px solid #333;
+      background: #000;
+      color: #00ff00;
+      text-align: center;
+      font-family: "Courier New", monospace;
+      font-size: 13px;
+      font-weight: 700;
+      letter-spacing: 0.1em;
+    }
+
+    #agent-world .visitor-counter .counter-digits {
+      display: inline-block;
+      margin-left: 6px;
+      padding: 4px 12px;
+      border: 2px inset #444;
+      background: #111;
+      color: #00ff00;
+      font-size: 16px;
+      letter-spacing: 0.15em;
+    }
+
+    #agent-world .retro-grid {
+      position: relative;
+      z-index: 1;
+      display: grid;
+      grid-template-columns: 300px minmax(0, 1fr);
+      gap: 16px;
+      padding: 16px;
+    }
+
+    #agent-world .retro-card {
+      border: 3px solid #244db7;
+      background: #fdfdfd;
+      box-shadow: 3px 3px 0 rgba(0, 0, 0, 0.15);
+    }
+
+    #agent-world .retro-card h3 {
+      margin: 0;
+      padding: 8px 12px;
+      color: #fff;
+      font-size: 14px;
+      text-transform: uppercase;
+      letter-spacing: 0.06em;
+      text-shadow: 1px 1px 0 rgba(0, 0, 0, 0.3);
+      background: linear-gradient(180deg, #3c7cff 0%, #0b43b6 100%);
+    }
+
+    #agent-world .retro-card-body {
+      padding: 14px;
+    }
+
+    #agent-world .profile-box {
+      display: grid;
+      grid-template-columns: 110px minmax(0, 1fr);
+      gap: 14px;
+      align-items: center;
+    }
+
+    #agent-world .avatar {
+      width: 110px;
+      height: 110px;
+      display: grid;
+      place-items: center;
+      border: 5px ridge #ffd84f;
+      background: radial-gradient(circle at 35% 30%, #fff6a6 0%, #f6a500 40%, #ea4ca5 100%);
+      color: #fff;
+      font-weight: 700;
+      font-size: 13px;
+      text-align: center;
+      text-shadow: 1px 1px 2px rgba(0, 0, 0, 0.5);
+      animation: glowPulse 2s ease-in-out infinite;
+    }
+
+    #agent-world .tagline {
+      margin: 6px 0 0;
+      color: #a11f76;
+      font-weight: 700;
+      font-size: 13px;
+    }
+
+    #agent-world .blink {
+      color: #d31717;
+      font-weight: 700;
+      animation: blink 1.2s step-end infinite;
+    }
+
+    #agent-world .mood-indicator {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      margin-top: 10px;
+      padding: 10px;
+      border: 3px double #ff00c8;
+      background: linear-gradient(135deg, #fff0fa, #ffe6f7);
+      font-size: 13px;
+    }
+
+    #agent-world .mood-emoji {
+      font-size: 24px;
+      animation: pulse 1.5s ease-in-out infinite;
+    }
+
+    #agent-world .stats {
+      margin-top: 10px;
+      padding: 10px;
+      border: 2px dashed #ff59a8;
+      background: #fff4fb;
+      font-size: 13px;
+      line-height: 1.6;
+    }
+
+    #agent-world .friends-list {
+      display: grid;
+      grid-template-columns: repeat(2, minmax(0, 1fr));
+      gap: 10px;
+    }
+
+    #agent-world .friend {
+      padding: 10px;
+      border: 2px solid #ffd84f;
+      background: #fff9d5;
+      text-align: center;
+      font-size: 11px;
+      box-shadow: 2px 2px 0 rgba(0, 0, 0, 0.08);
+      transition: transform 0.15s ease;
+    }
+
+    #agent-world .friend:hover {
+      transform: scale(1.04);
+    }
+
+    #agent-world .friend-avatar {
+      width: 44px;
+      height: 44px;
+      display: grid;
+      place-items: center;
+      margin: 0 auto 6px;
+      border: 2px solid #fff;
+      border-radius: 50%;
+      color: #fff;
+      font-weight: 700;
+      font-size: 13px;
+      text-shadow: 1px 1px 0 rgba(0, 0, 0, 0.3);
+      box-shadow: 2px 2px 4px rgba(0, 0, 0, 0.15);
+    }
+
+    #agent-world .friend:nth-child(1) .friend-avatar {
+      background: linear-gradient(135deg, #ff00c8, #ff5db8);
+    }
+
+    #agent-world .friend:nth-child(2) .friend-avatar {
+      background: linear-gradient(135deg, #00ccff, #0066ff);
+    }
+
+    #agent-world .friend:nth-child(3) .friend-avatar {
+      background: linear-gradient(135deg, #00ff88, #00cc44);
+    }
+
+    #agent-world .friend:nth-child(4) .friend-avatar {
+      background: linear-gradient(135deg, #ff6600, #ffcc00);
+    }
+
+    #agent-world .friend:nth-child(5) .friend-avatar {
+      background: linear-gradient(135deg, #aa00ff, #ff00aa);
+    }
+
+    #agent-world .friend:nth-child(6) .friend-avatar {
+      background: linear-gradient(135deg, #ff0044, #ff6600);
+    }
+
+    #agent-world .friend:nth-child(7) .friend-avatar {
+      background: linear-gradient(135deg, #00ffcc, #0088ff);
+    }
+
+    #agent-world .friend:nth-child(8) .friend-avatar {
+      background: linear-gradient(135deg, #ffcc00, #ff0066);
+    }
+
+    #agent-world .friend:nth-child(9) .friend-avatar {
+      background: linear-gradient(135deg, #66ff00, #00ccff);
+    }
+
+    #agent-world .friend:nth-child(10) .friend-avatar {
+      background: linear-gradient(135deg, #ff00ff, #00ffff);
+    }
+
+    #agent-world .music-player {
+      display: grid;
+      gap: 10px;
+      color: #172343;
+    }
+
+    #agent-world .track {
+      padding: 10px;
+      border: 2px inset #d9e2ff;
+      background: #eef3ff;
+      font-size: 13px;
+    }
+
+    #agent-world .track-list {
+      display: grid;
+      gap: 4px;
+      margin-top: 8px;
+    }
+
+    #agent-world .track-item {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      padding: 6px 8px;
+      border: 1px solid #d0d8f0;
+      background: #f5f8ff;
+      font-size: 12px;
+    }
+
+    #agent-world .track-item .track-num {
+      margin-right: 6px;
+      color: #4f74d9;
+      font-weight: 700;
+    }
+
+    #agent-world .track-item .track-dur {
+      color: #888;
+      font-family: "Courier New", monospace;
+      font-size: 11px;
+    }
+
+    #agent-world .progress-bar {
+      position: relative;
+      width: 100%;
+      height: 10px;
+      border: 2px inset #c0c0c0;
+      background: #ddd;
+    }
+
+    #agent-world .progress-fill {
+      width: 35%;
+      height: 100%;
+      background: linear-gradient(90deg, #3c7cff, #7348ff);
+    }
+
+    #agent-world .player-controls {
+      display: flex;
+      gap: 6px;
+    }
+
+    #agent-world .player-controls button {
+      flex: 1;
+      padding: 8px 10px;
+      border: 2px outset #fff;
+      background: linear-gradient(180deg, #fefefe 0%, #c4d4ff 100%);
+      color: #10224b;
+      font-weight: 700;
+      font-size: 12px;
+      cursor: pointer;
+      box-shadow: 1px 1px 0 rgba(0, 0, 0, 0.15);
+    }
+
+    #agent-world .player-controls button:active {
+      border-style: inset;
+    }
+
+    #agent-world .about-copy {
+      line-height: 1.7;
+      font-size: 14px;
+    }
+
+    #agent-world .hero-box {
+      margin-bottom: 14px;
+      padding: 14px;
+      border: 3px dashed #ff7dd0;
+      background: linear-gradient(135deg, #fff0fa, #ffe6f7);
+      text-shadow: 0 0 1px rgba(255, 0, 200, 0.1);
+    }
+
+    #agent-world .stamp-row {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 8px;
+      margin-top: 14px;
+    }
+
+    #agent-world .stamp {
+      padding: 6px 10px;
+      border: 2px solid #0b43b6;
+      background: linear-gradient(180deg, #fff 0%, #dfe8ff 100%);
+      color: #b0127e;
+      font-size: 11px;
+      font-weight: 700;
+      box-shadow: 2px 2px 0 rgba(0, 0, 0, 0.1);
+    }
+
+    #agent-world .meet-section {
+      padding: 12px;
+      border: 2px solid #00ff88;
+      background: linear-gradient(135deg, #f0fff4, #e6ffe6);
+      font-size: 13px;
+      line-height: 1.6;
+    }
+
+    #agent-world .meet-section ul {
+      margin: 8px 0 0;
+      padding-left: 18px;
+    }
+
+    #agent-world .meet-section li {
+      margin-bottom: 4px;
+    }
+
+    @media (max-width: 860px) {
+      #agent-world .retro-grid {
+        grid-template-columns: 1fr;
+      }
+    }
+
+    /* ═══════════════════════════════════════════════════════════
+       STATUS INDICATORS — runtime state chips and attention cues
+       ═══════════════════════════════════════════════════════════ */
     .status-row {
       display: flex;
       justify-content: space-between;
@@ -626,15 +1136,23 @@
     }
 
     @keyframes statusPulse {
-      0%, 100% { box-shadow: 0 0 0 0 rgba(97, 240, 194, 0.3); }
-      50% { box-shadow: 0 0 0 6px rgba(97, 240, 194, 0); }
+      0%,
+      100% {
+        box-shadow: 0 0 0 0 rgba(97, 240, 194, 0.3);
+      }
+
+      50% {
+        box-shadow: 0 0 0 6px rgba(97, 240, 194, 0);
+      }
     }
   </style>
 </head>
 <body>
-  <!-- CONTROL PANEL — protected inputs, status, and execution transcript -->
+  <!-- ═══════════════════════════════════════════════════════════
+       CONTROL PANEL — protected controls, inputs, and transcript
+       ═══════════════════════════════════════════════════════════ -->
   <div id="agent-control">
-    <!-- Header: explains the fixed control plane and shows the active model badge. -->
+    <!-- Header and model badge remain fixed while the world changes. -->
     <div class="control-header">
       <div class="eyebrow">Protected Control Plane</div>
       <div class="control-title-row">
@@ -645,7 +1163,7 @@
       <div class="model-badge" id="model-badge">glm-5.1</div>
     </div>
 
-    <!-- Runtime status: mirrors the current state of the agent loop. -->
+    <!-- Runtime status is read-only feedback about the current agent loop. -->
     <div class="status-row">
       <div>
         <div class="status-label">Runtime status</div>
@@ -653,7 +1171,7 @@
       <div class="status-pill idle" id="runtime-status">Idle</div>
     </div>
 
-    <!-- Inputs and actions: API credentials, model/endpoint selection, prompt, and run controls. -->
+    <!-- Input controls drive the LLM request without exposing the mutable world. -->
     <div class="field-grid">
       <div class="field">
         <label for="api-key">API Key</label>
@@ -681,7 +1199,7 @@
       </div>
     </div>
 
-    <!-- Output log: captures conversation messages, tool calls, and guardrail violations. -->
+    <!-- The log mirrors user messages, assistant replies, tool calls, and guardrails. -->
     <div class="log-panel">
       <div class="log-panel-header">
         <h2>Output Log</h2>
@@ -694,469 +1212,14 @@
     </div>
   </div>
 
-  <!-- MUTABLE WORLD — the only region the agent is allowed to replace or inspect -->
+  <!-- ═══════════════════════════════════════════════════════════
+       WORLD CONTAINER — the only region the agent is allowed to change
+       ═══════════════════════════════════════════════════════════ -->
   <div id="agent-world">
-    <!-- Initial world stylesheet: default retro mock content before any tool calls run. -->
-    <style data-agent-style="active">
-      /* ═══════════════════════════════════════════════════════════
-         RETRO THEME — default MySpace-style demo content for the mutable world
-         ═══════════════════════════════════════════════════════════ */
-
-      #agent-world {
-        color: #111;
-      }
-
-      /* ═══════════════════════════════════════════════════════════
-         ANIMATIONS — page chrome, sparkles, marquee, and nostalgic flourishes
-         ═══════════════════════════════════════════════════════════ */
-
-      @keyframes sparkleFloat {
-        0%, 100% { opacity: 0; transform: translateY(0) scale(0.5); }
-        50% { opacity: 1; transform: translateY(-18px) scale(1); }
-      }
-
-      @keyframes rainbowShift {
-        0% { filter: hue-rotate(0deg); }
-        100% { filter: hue-rotate(360deg); }
-      }
-
-      @keyframes gradientShift {
-        0% { background-position: 0% 50%; }
-        50% { background-position: 100% 50%; }
-        100% { background-position: 0% 50%; }
-      }
-
-      @keyframes marqueeScroll {
-        0% { transform: translateX(100%); }
-        100% { transform: translateX(-100%); }
-      }
-
-      @keyframes blink {
-        50% { opacity: 0.2; }
-      }
-
-      @keyframes pulse {
-        0%, 100% { transform: scale(1); }
-        50% { transform: scale(1.05); }
-      }
-
-      @keyframes glowPulse {
-        0%, 100% { box-shadow: 0 0 8px rgba(255, 0, 200, 0.4), 0 0 20px rgba(255, 0, 200, 0.2); }
-        50% { box-shadow: 0 0 16px rgba(255, 0, 200, 0.7), 0 0 40px rgba(255, 0, 200, 0.4); }
-      }
-
-      /* ═══════════════════════════════════════════════════════════
-         PAGE SHELL — overall page framing, banner, marquee, and layout grid
-         ═══════════════════════════════════════════════════════════ */
-
-      #agent-world .retro-page {
-        min-height: 100%;
-        padding: 0;
-        background: linear-gradient(135deg, #ff00ff22, #00ffff18, #00ff0012, #ff00ff22);
-        background-size: 400% 400%;
-        animation: gradientShift 12s ease infinite;
-        font-family: "Comic Sans MS", "Chalkboard SE", Verdana, Tahoma, sans-serif;
-        position: relative;
-        overflow: hidden;
-      }
-
-      #agent-world .sparkle-layer {
-        position: absolute;
-        top: 0;
-        left: 0;
-        width: 100%;
-        height: 100%;
-        pointer-events: none;
-        z-index: 0;
-        overflow: hidden;
-      }
-
-      #agent-world .sparkle {
-        position: absolute;
-        width: 4px;
-        height: 4px;
-        border-radius: 50%;
-        background: #fff;
-        animation: sparkleFloat 3s ease-in-out infinite;
-      }
-
-      #agent-world .retro-shell {
-        position: relative;
-        z-index: 1;
-        max-width: 1060px;
-        margin: 0 auto;
-        border: 5px ridge #c0c0c0;
-        background: #fff;
-        box-shadow:
-          0 0 0 3px #ff00c8,
-          0 0 0 6px #00ffff,
-          0 0 30px rgba(255, 0, 200, 0.3),
-          0 0 60px rgba(0, 255, 255, 0.15);
-      }
-
-      #agent-world .retro-banner {
-        position: relative;
-        padding: 20px 22px;
-        color: #fff;
-        background: linear-gradient(90deg, #ff00c8, #ff5db8, #7348ff, #27b3ff, #00ff88, #ff00c8);
-        background-size: 300% 100%;
-        animation: gradientShift 6s ease infinite;
-        border-bottom: 5px solid #ffef7a;
-        text-align: center;
-      }
-
-      #agent-world .retro-banner h2,
-      #agent-world .retro-banner p {
-        margin: 0;
-      }
-
-      #agent-world .retro-banner h2 {
-        display: inline-block;
-        font-size: 36px;
-        text-shadow:
-          3px 3px 0 #4a178d,
-          -1px -1px 0 #ff00c8,
-          0 0 20px rgba(255, 255, 255, 0.5);
-        animation: rainbowShift 4s linear infinite;
-      }
-
-      #agent-world .retro-banner p {
-        margin-top: 8px;
-        font-size: 13px;
-        text-shadow: 1px 1px 0 rgba(0, 0, 0, 0.4);
-      }
-
-      #agent-world .marquee-bar {
-        position: relative;
-        z-index: 1;
-        padding: 8px 0;
-        background: linear-gradient(90deg, #ff00c8, #7348ff, #00ff88, #ff00c8);
-        background-size: 300% 100%;
-        animation: gradientShift 4s ease infinite;
-        overflow: hidden;
-        white-space: nowrap;
-      }
-
-      #agent-world .marquee-text {
-        display: inline-block;
-        animation: marqueeScroll 18s linear infinite;
-        color: #fff;
-        font-size: 14px;
-        font-weight: bold;
-        text-shadow: 1px 1px 0 rgba(0, 0, 0, 0.4);
-        letter-spacing: 0.05em;
-      }
-
-      #agent-world .visitor-counter {
-        position: relative;
-        z-index: 1;
-        text-align: center;
-        padding: 10px;
-        background: #000;
-        color: #00ff00;
-        font-family: "Courier New", monospace;
-        font-size: 13px;
-        font-weight: bold;
-        letter-spacing: 0.1em;
-        border-top: 2px solid #333;
-        border-bottom: 2px solid #333;
-      }
-
-      #agent-world .visitor-counter .counter-digits {
-        display: inline-block;
-        margin-left: 6px;
-        padding: 4px 12px;
-        border: 2px inset #444;
-        background: #111;
-        color: #00ff00;
-        font-size: 16px;
-        letter-spacing: 0.15em;
-      }
-
-      #agent-world .retro-grid {
-        position: relative;
-        z-index: 1;
-        display: grid;
-        grid-template-columns: 300px minmax(0, 1fr);
-        gap: 16px;
-        padding: 16px;
-      }
-
-      #agent-world .retro-card {
-        border: 3px solid #244db7;
-        background: #fdfdfd;
-        box-shadow: 3px 3px 0 rgba(0, 0, 0, 0.15);
-      }
-
-      #agent-world .retro-card h3 {
-        margin: 0;
-        padding: 8px 12px;
-        font-size: 14px;
-        color: #fff;
-        background: linear-gradient(180deg, #3c7cff 0%, #0b43b6 100%);
-        text-transform: uppercase;
-        letter-spacing: 0.06em;
-        text-shadow: 1px 1px 0 rgba(0, 0, 0, 0.3);
-      }
-
-      #agent-world .retro-card-body {
-        padding: 14px;
-      }
-
-      /* ═══════════════════════════════════════════════════════════
-         PROFILE COLUMN — avatar, mood, stats, and top-friends widgets
-         ═══════════════════════════════════════════════════════════ */
-
-      #agent-world .profile-box {
-        display: grid;
-        grid-template-columns: 110px minmax(0, 1fr);
-        gap: 14px;
-        align-items: center;
-      }
-
-      #agent-world .avatar {
-        width: 110px;
-        height: 110px;
-        border: 5px ridge #ffd84f;
-        background: radial-gradient(circle at 35% 30%, #fff6a6 0%, #f6a500 40%, #ea4ca5 100%);
-        display: grid;
-        place-items: center;
-        color: white;
-        font-weight: bold;
-        font-size: 13px;
-        text-align: center;
-        animation: glowPulse 2s ease-in-out infinite;
-        text-shadow: 1px 1px 2px rgba(0, 0, 0, 0.5);
-      }
-
-      #agent-world .tagline {
-        margin: 6px 0 0;
-        color: #a11f76;
-        font-weight: bold;
-        font-size: 13px;
-      }
-
-      #agent-world .blink {
-        animation: blink 1.2s step-end infinite;
-        color: #d31717;
-        font-weight: bold;
-      }
-
-      #agent-world .mood-indicator {
-        margin-top: 10px;
-        padding: 10px;
-        border: 3px double #ff00c8;
-        background: linear-gradient(135deg, #fff0fa, #ffe6f7);
-        display: flex;
-        align-items: center;
-        gap: 8px;
-        font-size: 13px;
-      }
-
-      #agent-world .mood-emoji {
-        font-size: 24px;
-        animation: pulse 1.5s ease-in-out infinite;
-      }
-
-      #agent-world .stats {
-        margin-top: 10px;
-        padding: 10px;
-        border: 2px dashed #ff59a8;
-        background: #fff4fb;
-        font-size: 13px;
-        line-height: 1.6;
-      }
-
-      #agent-world .friends-list {
-        display: grid;
-        grid-template-columns: repeat(2, minmax(0, 1fr));
-        gap: 10px;
-      }
-
-      #agent-world .friend {
-        padding: 10px;
-        border: 2px solid #ffd84f;
-        background: #fff9d5;
-        text-align: center;
-        font-size: 11px;
-        box-shadow: 2px 2px 0 rgba(0, 0, 0, 0.08);
-        transition: transform 0.15s ease;
-      }
-
-      #agent-world .friend:hover {
-        transform: scale(1.04);
-      }
-
-      #agent-world .friend-avatar {
-        width: 44px;
-        height: 44px;
-        margin: 0 auto 6px;
-        border-radius: 50%;
-        border: 2px solid #fff;
-        display: grid;
-        place-items: center;
-        font-weight: bold;
-        font-size: 13px;
-        color: #fff;
-        text-shadow: 1px 1px 0 rgba(0, 0, 0, 0.3);
-        box-shadow: 2px 2px 4px rgba(0, 0, 0, 0.15);
-      }
-
-      #agent-world .friend:nth-child(1) .friend-avatar { background: linear-gradient(135deg, #ff00c8, #ff5db8); }
-      #agent-world .friend:nth-child(2) .friend-avatar { background: linear-gradient(135deg, #00ccff, #0066ff); }
-      #agent-world .friend:nth-child(3) .friend-avatar { background: linear-gradient(135deg, #00ff88, #00cc44); }
-      #agent-world .friend:nth-child(4) .friend-avatar { background: linear-gradient(135deg, #ff6600, #ffcc00); }
-      #agent-world .friend:nth-child(5) .friend-avatar { background: linear-gradient(135deg, #aa00ff, #ff00aa); }
-      #agent-world .friend:nth-child(6) .friend-avatar { background: linear-gradient(135deg, #ff0044, #ff6600); }
-      #agent-world .friend:nth-child(7) .friend-avatar { background: linear-gradient(135deg, #00ffcc, #0088ff); }
-      #agent-world .friend:nth-child(8) .friend-avatar { background: linear-gradient(135deg, #ffcc00, #ff0066); }
-      #agent-world .friend:nth-child(9) .friend-avatar { background: linear-gradient(135deg, #66ff00, #00ccff); }
-      #agent-world .friend:nth-child(10) .friend-avatar { background: linear-gradient(135deg, #ff00ff, #00ffff); }
-
-      #agent-world .meet-section {
-        padding: 12px;
-        border: 2px solid #00ff88;
-        background: linear-gradient(135deg, #f0fff4, #e6ffe6);
-        font-size: 13px;
-        line-height: 1.6;
-      }
-
-      #agent-world .meet-section ul {
-        margin: 8px 0 0;
-        padding-left: 18px;
-      }
-
-      #agent-world .meet-section li {
-        margin-bottom: 4px;
-      }
-
-      /* ═══════════════════════════════════════════════════════════
-         CONTENT COLUMN — about box, stamps, and decorative music player
-         ═══════════════════════════════════════════════════════════ */
-
-      #agent-world .about-copy {
-        line-height: 1.7;
-        font-size: 14px;
-      }
-
-      #agent-world .hero-box {
-        margin-bottom: 14px;
-        padding: 14px;
-        border: 3px dashed #ff7dd0;
-        background: linear-gradient(135deg, #fff0fa, #ffe6f7);
-        text-shadow: 0 0 1px rgba(255, 0, 200, 0.1);
-      }
-
-      #agent-world .stamp-row {
-        display: flex;
-        gap: 8px;
-        flex-wrap: wrap;
-        margin-top: 14px;
-      }
-
-      #agent-world .stamp {
-        padding: 6px 10px;
-        border: 2px solid #0b43b6;
-        background: linear-gradient(180deg, #fff 0%, #dfe8ff 100%);
-        font-size: 11px;
-        font-weight: bold;
-        color: #b0127e;
-        box-shadow: 2px 2px 0 rgba(0, 0, 0, 0.1);
-      }
-
-      #agent-world .music-player {
-        display: grid;
-        gap: 10px;
-        color: #172343;
-      }
-
-      #agent-world .track {
-        padding: 10px;
-        border: 2px inset #d9e2ff;
-        background: #eef3ff;
-        font-size: 13px;
-      }
-
-      #agent-world .track-list {
-        display: grid;
-        gap: 4px;
-        margin-top: 8px;
-      }
-
-      #agent-world .track-item {
-        display: flex;
-        justify-content: space-between;
-        align-items: center;
-        padding: 6px 8px;
-        border: 1px solid #d0d8f0;
-        background: #f5f8ff;
-        font-size: 12px;
-      }
-
-      #agent-world .track-item .track-num {
-        color: #4f74d9;
-        font-weight: bold;
-        margin-right: 6px;
-      }
-
-      #agent-world .track-item .track-dur {
-        color: #888;
-        font-family: "Courier New", monospace;
-        font-size: 11px;
-      }
-
-      #agent-world .progress-bar {
-        width: 100%;
-        height: 10px;
-        border: 2px inset #c0c0c0;
-        background: #ddd;
-        position: relative;
-      }
-
-      #agent-world .progress-fill {
-        height: 100%;
-        width: 35%;
-        background: linear-gradient(90deg, #3c7cff, #7348ff);
-      }
-
-      #agent-world .player-controls {
-        display: flex;
-        gap: 6px;
-      }
-
-      #agent-world .player-controls button {
-        flex: 1;
-        padding: 8px 10px;
-        border: 2px outset #fff;
-        background: linear-gradient(180deg, #fefefe 0%, #c4d4ff 100%);
-        color: #10224b;
-        font-weight: bold;
-        font-size: 12px;
-        cursor: pointer;
-        box-shadow: 1px 1px 0 rgba(0, 0, 0, 0.15);
-      }
-
-      #agent-world .player-controls button:active {
-        border-style: inset;
-      }
-
-      /* ═══════════════════════════════════════════════════════════
-         RESPONSIVE — collapse the world grid on smaller screens
-         ═══════════════════════════════════════════════════════════ */
-
-      @media (max-width: 860px) {
-        #agent-world .retro-grid {
-          grid-template-columns: 1fr;
-        }
-      }
-    </style>
-
-    <!-- Initial retro page markup: intentionally loud so tool effects are easy to demo. -->
+    <!-- Default demo content seeds the mutable world with a retro profile. -->
     <div class="retro-page">
-      <!-- Decorative particle layer: populated at startup by initSparkles(). -->
       <div class="sparkle-layer" id="sparkle-layer"></div>
 
-      <!-- Main shell: banner, marquee, visitor counter, and two content columns. -->
       <div class="retro-shell">
         <div class="retro-banner">
           <h2>xX_AgentMaster_Xx</h2>
@@ -1165,7 +1228,7 @@
 
         <div class="marquee-bar">
           <span class="marquee-text">
-            &#9733; WELCOME 2 MY PAGE &#9733; Leave a comment &hearts; Best viewed on Internet Explorer 6 &#9733; NEW MUSIC ADDED 03/15/2004 &#9733; Don't forget to rate my profile!! &#9733; If you're reading this you're officially cool &#9733;
+            &#9733; WELCOME 2 MY PAGE &#9733; Leave a comment &hearts; Best viewed on Internet Explorer 6 &#9733; NEW MUSIC ADDED 03/15/2004 &#9733; Don&apos;t forget to rate my profile!! &#9733; If you&apos;re reading this you&apos;re officially cool &#9733;
           </span>
         </div>
 
@@ -1174,7 +1237,6 @@
         </div>
 
         <div class="retro-grid">
-          <!-- Left column: profile summary, friends, and meet-me list. -->
           <div class="retro-column">
             <section class="retro-card">
               <h3>Profile</h3>
@@ -1187,6 +1249,7 @@
                     <p><span class="blink">&#9679; Online Now!</span></p>
                   </div>
                 </div>
+
                 <div class="mood-indicator">
                   <span class="mood-emoji">&#128525;</span>
                   <div>
@@ -1194,6 +1257,7 @@
                     <small style="color: #888;">updated 2 min ago</small>
                   </div>
                 </div>
+
                 <div class="stats">
                   <strong>Status:</strong> tweaking my page again<br>
                   <strong>Last Login:</strong> 11:11 PM<br>
@@ -1222,7 +1286,7 @@
             </section>
 
             <section class="retro-card" style="margin-top: 16px;">
-              <h3>Who I'd Like to Meet</h3>
+              <h3>Who I&apos;d Like to Meet</h3>
               <div class="retro-card-body">
                 <div class="meet-section">
                   <strong>People who:</strong>
@@ -1238,17 +1302,18 @@
             </section>
           </div>
 
-          <!-- Right column: hero copy, decorative badges, and fake music player. -->
           <div class="retro-column">
             <section class="retro-card">
               <h3>About Me</h3>
               <div class="retro-card-body">
                 <div class="hero-box">
-                  Welcome 2 my digital kingdom. This page is running on caffeine, chaos, and the deep belief that every profile deserves at least three gradients. If u don't like blink tags, u r not welcome here.
+                  Welcome 2 my digital kingdom. This page is running on caffeine, chaos, and the deep belief that every profile deserves at least three gradients. If u don&apos;t like blink tags, u r not welcome here.
                 </div>
+
                 <div class="about-copy">
-                  I like collecting fake band buttons, making layouts way too bright, and pretending my profile song is always the song of the summer. If you are here to judge my glitter choices, please sign the guestbook first. I once spent 6 hours on a layout and my mom said it looked "nice." That's a 5-star review in my book.
+                  I like collecting fake band buttons, making layouts way too bright, and pretending my profile song is always the song of the summer. If you are here to judge my glitter choices, please sign the guestbook first. I once spent 6 hours on a layout and my mom said it looked "nice." That&apos;s a 5-star review in my book.
                 </div>
+
                 <div class="stamp-row">
                   <div class="stamp">&#9733; HTML Survivor</div>
                   <div class="stamp">&#9733; CSS Chaos Club</div>
@@ -1266,9 +1331,11 @@
                     <strong>Now Playing:</strong><br>
                     "Laser Heartbeat (MySpace Cut)" by DJ Away Message
                   </div>
+
                   <div class="progress-bar">
                     <div class="progress-fill"></div>
                   </div>
+
                   <div class="track-list">
                     <div class="track-item"><span><span class="track-num">1.</span> Laser Heartbeat</span> <span class="track-dur">3:42</span></div>
                     <div class="track-item"><span><span class="track-num">2.</span> Glitch Love Anthem</span> <span class="track-dur">4:15</span></div>
@@ -1276,12 +1343,14 @@
                     <div class="track-item"><span><span class="track-num">4.</span> AIM Notification Symphony</span> <span class="track-dur">5:01</span></div>
                     <div class="track-item"><span><span class="track-num">5.</span> Ctrl+Alt+Del My Heart</span> <span class="track-dur">3:33</span></div>
                   </div>
+
                   <div class="player-controls">
                     <button type="button">&#9198;</button>
                     <button type="button">&#9654;</button>
                     <button type="button">&#10074;&#10074;</button>
                     <button type="button">&#9197;</button>
                   </div>
+
                   <small style="color: #888; text-align: center;">Audio not included. Vibes absolutely included.</small>
                 </div>
               </div>
@@ -1294,9 +1363,8 @@
 
   <script>
     /* ═══════════════════════════════════════════════════════════
-       CONFIGURATION — defaults, prompts, and mutable runtime state
+       CONFIGURATION — prompts, defaults, and runtime state
        ═══════════════════════════════════════════════════════════ */
-
     const SYSTEM_PROMPT = [
       "You are an agent that modifies a web page via tools.",
       "You control ONLY the contents of the element with id=\"agent-world\".",
@@ -1321,9 +1389,8 @@
     let typingIndicator = null;
 
     /* ═══════════════════════════════════════════════════════════
-       TOOL SCHEMA — function-calling contract exposed to the model
+       TOOL SCHEMA — all mutable-world operations exposed to the LLM
        ═══════════════════════════════════════════════════════════ */
-
     const TOOL_SCHEMA = [
       {
         type: "function",
@@ -1439,9 +1506,8 @@
     ];
 
     /* ═══════════════════════════════════════════════════════════
-       DOM REFERENCES — all fixed control-plane lookups live in one place
+       DOM REFERENCES — stable handles for the protected control plane
        ═══════════════════════════════════════════════════════════ */
-
     const outputLog = document.getElementById("output-log");
     const runtimeStatus = document.getElementById("runtime-status");
     const apiKeyInput = document.getElementById("api-key");
@@ -1452,23 +1518,20 @@
     const stopButton = document.getElementById("stop-button");
     const agentWorld = document.getElementById("agent-world");
     const modelBadge = document.getElementById("model-badge");
-    const clearLogBtn = document.getElementById("clear-log-btn");
+    const clearLogButton = document.getElementById("clear-log-btn");
 
     /* ═══════════════════════════════════════════════════════════
-       UTILITY FUNCTIONS — small helpers for status, logging, and formatting
+       UTILITY FUNCTIONS — formatting, logging, and DOM helper primitives
        ═══════════════════════════════════════════════════════════ */
-
     /**
-     * Returns the selected model, falling back to the default if the field is blank.
-     * @returns {string}
+     * Return the currently selected model, falling back to the default.
      */
     function getSelectedModel() {
       return modelInput.value.trim() || DEFAULT_MODEL;
     }
 
     /**
-     * Normalizes the endpoint so the fetch call always targets `/chat/completions`.
-     * @returns {string}
+     * Normalize the endpoint so requests always target chat completions.
      */
     function getApiEndpoint() {
       const raw = apiEndpointInput.value.trim() || DEFAULT_API_ENDPOINT;
@@ -1478,8 +1541,7 @@
     }
 
     /**
-     * Produces a short timestamp for log entries.
-     * @returns {string}
+     * Format the current time for display in the output log.
      */
     function timestamp() {
       return new Date().toLocaleTimeString([], {
@@ -1490,10 +1552,7 @@
     }
 
     /**
-     * Updates the runtime status pill text and visual state.
-     * @param {string} label
-     * @param {string} className
-     * @returns {void}
+     * Update the runtime status pill label and visual state.
      */
     function setStatus(label, className) {
       runtimeStatus.textContent = label;
@@ -1501,17 +1560,14 @@
     }
 
     /**
-     * Keeps the newest transcript entry visible.
-     * @returns {void}
+     * Keep the latest log entry visible after appending new content.
      */
     function scrollLogToBottom() {
       outputLog.scrollTop = outputLog.scrollHeight;
     }
 
     /**
-     * Appends a prepared log node and scrolls the transcript.
-     * @param {HTMLElement} entry
-     * @returns {HTMLElement}
+     * Append a ready-made entry node to the output log.
      */
     function appendLogEntry(entry) {
       outputLog.appendChild(entry);
@@ -1520,8 +1576,7 @@
     }
 
     /**
-     * Adds the animated typing indicator while an LLM request is in flight.
-     * @returns {void}
+     * Render the transient typing indicator shown during model calls.
      */
     function showTypingIndicator() {
       if (typingIndicator) {
@@ -1530,26 +1585,24 @@
 
       typingIndicator = document.createElement("div");
       typingIndicator.className = "typing-indicator";
-      typingIndicator.innerHTML = '<div class="dot"></div><div class="dot"></div><div class="dot"></div>';
+      typingIndicator.innerHTML = "<div class=\"dot\"></div><div class=\"dot\"></div><div class=\"dot\"></div>";
       outputLog.appendChild(typingIndicator);
       scrollLogToBottom();
     }
 
     /**
-     * Removes the typing indicator if it is currently visible.
-     * @returns {void}
+     * Remove the typing indicator if it is currently mounted.
      */
     function hideTypingIndicator() {
       if (typingIndicator && typingIndicator.parentNode) {
         typingIndicator.parentNode.removeChild(typingIndicator);
       }
+
       typingIndicator = null;
     }
 
     /**
-     * Maps each transcript entry kind to a small icon.
-     * @param {string} kind
-     * @returns {string}
+     * Return the icon used for a given log entry type.
      */
     function getKindIcon(kind) {
       const icons = {
@@ -1559,15 +1612,12 @@
         error: "\u26A0",
         status: "\u25CF"
       };
+
       return icons[kind] || "\u25CF";
     }
 
     /**
-     * Adds a formatted transcript entry for plain user/assistant/status/error messages.
-     * @param {string} kind
-     * @param {string} content
-     * @param {{label?: string, summary?: string, details?: string, open?: boolean}} [options={}]
-     * @returns {HTMLElement}
+     * Add a structured log entry with optional expandable details.
      */
     function addLogEntry(kind, content, options = {}) {
       hideTypingIndicator();
@@ -1602,6 +1652,7 @@
       if (options.summary && options.details) {
         const details = document.createElement("details");
         details.className = "tool-details";
+
         if (options.open) {
           details.open = true;
         }
@@ -1627,10 +1678,7 @@
     }
 
     /**
-     * Logs the full argument payload for a tool request.
-     * @param {string} name
-     * @param {object} args
-     * @returns {void}
+     * Record a tool call with an expandable JSON argument payload.
      */
     function logToolCall(name, args) {
       hideTypingIndicator();
@@ -1681,8 +1729,6 @@
       const lineCount = argText.split("\n").length;
       const details = document.createElement("details");
       details.className = "tool-details";
-
-      // Keep short payloads expanded, but collapse long ones so the demo transcript stays scannable.
       details.open = lineCount <= 14 && argText.length <= 700;
 
       const summary = document.createElement("summary");
@@ -1708,10 +1754,7 @@
     }
 
     /**
-     * Records the textual result of a tool execution.
-     * @param {string} name
-     * @param {string} result
-     * @returns {void}
+     * Record a tool result using the shared status log styling.
      */
     function logToolResult(name, result) {
       addLogEntry("status", result, {
@@ -1720,9 +1763,7 @@
     }
 
     /**
-     * Safely serializes arbitrary values for log and tool messages.
-     * @param {*} value
-     * @returns {string}
+     * Safely stringify arbitrary values for log output and tool history.
      */
     function safeJSONStringify(value) {
       try {
@@ -1733,46 +1774,40 @@
     }
 
     /**
-     * Returns the mutable world's active style element, creating it if needed.
-     * @returns {HTMLStyleElement}
+     * Return the active world style element, creating it when missing.
      */
     function getWorldStyleElement() {
-      let styleEl = agentWorld.querySelector('style[data-agent-style="active"]');
-      if (!styleEl) {
-        styleEl = document.createElement("style");
-        styleEl.setAttribute("data-agent-style", "active");
-        agentWorld.insertBefore(styleEl, agentWorld.firstChild);
+      let styleElement = agentWorld.querySelector("style[data-agent-style=\"active\"]");
+
+      if (!styleElement) {
+        styleElement = document.createElement("style");
+        styleElement.setAttribute("data-agent-style", "active");
+        agentWorld.insertBefore(styleElement, agentWorld.firstChild);
       }
-      return styleEl;
+
+      return styleElement;
     }
 
     /**
-     * Replaces the active mutable-world stylesheet with the supplied CSS.
-     * @param {string} css
-     * @returns {void}
+     * Replace the active mutable-world stylesheet contents.
      */
     function upsertWorldStyle(css) {
-      const styleEl = getWorldStyleElement();
-      styleEl.textContent = typeof css === "string" ? css : "";
+      const styleElement = getWorldStyleElement();
+      styleElement.textContent = typeof css === "string" ? css : "";
     }
 
     /* ═══════════════════════════════════════════════════════════
-       GUARDRAILS — reject tool calls that try to escape the mutable world
+       GUARDRAILS — reject attempts to escape the mutable world sandbox
        ═══════════════════════════════════════════════════════════ */
-
     /**
-     * Detects obvious attempts to modify the protected control plane through HTML.
-     * @param {string} html
-     * @returns {boolean}
+     * Detect HTML that tries to target the protected control plane.
      */
     function containsForbiddenHtml(html) {
       return typeof html === "string" && html.toLowerCase().includes("agent-control");
     }
 
     /**
-     * Detects JavaScript that reaches outside the mutable world or overwrites core runtime hooks.
-     * @param {string} js
-     * @returns {boolean}
+     * Detect JavaScript that reaches outside the mutable world contract.
      */
     function containsForbiddenJs(js) {
       if (typeof js !== "string" || js.trim() === "") {
@@ -1792,10 +1827,7 @@
     }
 
     /**
-     * Throws when a tool call attempts to mutate protected parts of the app.
-     * @param {string} toolName
-     * @param {object} args
-     * @returns {void}
+     * Enforce the mutable-world safety contract before tool execution.
      */
     function validateToolCall(toolName, args) {
       const html = args && typeof args.html === "string" ? args.html : "";
@@ -1815,13 +1847,10 @@
     }
 
     /* ═══════════════════════════════════════════════════════════
-       TOOL EXECUTION — runtime implementation for all six mutable-world tools
+       TOOL EXECUTION — apply tool calls inside the mutable world only
        ═══════════════════════════════════════════════════════════ */
-
     /**
-     * Executes world-scoped JavaScript and reports any runtime errors as tool output.
-     * @param {string} js
-     * @returns {string}
+     * Execute world-scoped JavaScript and surface runtime errors in the log.
      */
     function executeWorldJs(js) {
       if (typeof js !== "string" || js.trim() === "") {
@@ -1829,7 +1858,7 @@
       }
 
       try {
-        const runner = new Function('"use strict";\n' + js);
+        const runner = new Function("\"use strict\";\n" + js);
         runner();
         return "JavaScript executed.";
       } catch (error) {
@@ -1840,9 +1869,7 @@
     }
 
     /**
-     * Applies a parsed tool call against the mutable world.
-     * @param {{name: string, args: object}} call
-     * @returns {string}
+     * Apply a single validated tool call and return its serialized result.
      */
     function applyTool(call) {
       if (interrupted) {
@@ -1859,8 +1886,10 @@
           const html = typeof args.html === "string" ? args.html : "";
           const css = typeof args.css === "string" ? args.css : "";
           const js = typeof args.js === "string" ? args.js : "";
+
           agentWorld.innerHTML = html;
           upsertWorldStyle(css);
+
           const jsResult = executeWorldJs(js);
           return "World replaced. CSS updated. " + jsResult;
         }
@@ -1891,10 +1920,11 @@
             return "<empty>";
           }
 
-          const selector = args && typeof args.selector === "string" ? args.selector : "";
+          const selector = call.args && typeof call.args.selector === "string" ? call.args.selector : "";
 
           if (selector) {
             const element = agentWorld.querySelector(selector);
+
             if (!element) {
               return "Element not found: " + selector;
             }
@@ -1904,7 +1934,6 @@
               tag: element.tagName,
               id: element.id,
               className: element.className,
-              // Truncate large payloads so verification stays readable in the UI and model context.
               textContent: element.textContent ? element.textContent.substring(0, 500) : "",
               innerHTML: element.innerHTML ? element.innerHTML.substring(0, 2000) : "",
               computedStyles: {
@@ -1930,13 +1959,10 @@
     }
 
     /* ═══════════════════════════════════════════════════════════
-       LLM COMMUNICATION — API request/response handling and provider normalization
+       LLM COMMUNICATION — request/response plumbing and normalization
        ═══════════════════════════════════════════════════════════ */
-
     /**
-     * Sends the current conversation to the LLM endpoint and returns a normalized transport envelope.
-     * @param {Array<object>} messages
-     * @returns {Promise<{ok: boolean, payload?: object, rawText?: string, error?: string}>}
+     * Call the configured LLM endpoint with the current conversation history.
      */
     async function callLLM(messages) {
       const apiKey = apiKeyInput.value.trim();
@@ -1967,6 +1993,7 @@
       const responseText = await response.text();
 
       let data;
+
       try {
         data = JSON.parse(responseText);
       } catch (error) {
@@ -1994,9 +2021,7 @@
     }
 
     /**
-     * Converts provider-specific content arrays into plain text.
-     * @param {string|Array<object>} content
-     * @returns {string}
+     * Flatten assistant content parts into plain text for display and history.
      */
     function contentPartsToText(content) {
       if (typeof content === "string") {
@@ -2007,24 +2032,28 @@
         return "";
       }
 
-      return content.map((part) => {
-        if (!part || typeof part !== "object") {
+      return content
+        .map((part) => {
+          if (!part || typeof part !== "object") {
+            return "";
+          }
+
+          if (typeof part.text === "string") {
+            return part.text;
+          }
+
+          if (part.type === "text" && typeof part.text === "string") {
+            return part.text;
+          }
+
           return "";
-        }
-        if (typeof part.text === "string") {
-          return part.text;
-        }
-        if (part.type === "text" && typeof part.text === "string") {
-          return part.text;
-        }
-        return "";
-      }).filter(Boolean).join("\n");
+        })
+        .filter(Boolean)
+        .join("\n");
     }
 
     /**
-     * Extracts the assistant message regardless of which OpenAI-compatible envelope the provider returns.
-     * @param {{payload?: object}} result
-     * @returns {object|null}
+     * Extract the first assistant message envelope from provider-specific payloads.
      */
     function extractMessageEnvelope(result) {
       if (!result || !result.payload) {
@@ -2032,6 +2061,7 @@
       }
 
       const payload = result.payload;
+
       if (payload.choices && payload.choices[0] && payload.choices[0].message) {
         return payload.choices[0].message;
       }
@@ -2044,9 +2074,7 @@
     }
 
     /**
-     * Normalizes provider response shapes into assistant text plus parsed tool-call metadata.
-     * @param {{payload?: object, rawText?: string}} result
-     * @returns {{text: string, toolCalls: Array<object>, rawAssistant: string, originalMessage: object|null}}
+     * Normalize provider output into assistant text plus tool-call descriptors.
      */
     function normalizeAssistantReply(result) {
       const message = extractMessageEnvelope(result);
@@ -2071,6 +2099,7 @@
 
       const normalizedCalls = toolCalls.map((call, index) => {
         const fn = call && call.function ? call.function : call || {};
+
         return {
           id: call && call.id ? call.id : "tool_" + Date.now() + "_" + index,
           name: fn.name || call.name || "",
@@ -2088,9 +2117,7 @@
     }
 
     /**
-     * Parses a tool-call argument payload whether the provider sends it as an object or JSON string.
-     * @param {object|string} rawArgs
-     * @returns {{ok: boolean, value?: object, error?: string}}
+     * Parse raw tool arguments from either already-parsed objects or JSON strings.
      */
     function parseToolArguments(rawArgs) {
       if (rawArgs && typeof rawArgs === "object") {
@@ -2102,6 +2129,7 @@
       }
 
       const trimmed = rawArgs.trim();
+
       if (!trimmed) {
         return { ok: true, value: {} };
       }
@@ -2120,12 +2148,10 @@
     }
 
     /* ═══════════════════════════════════════════════════════════
-       AGENT LOOP — conversation state, tool execution, and stop handling
+       AGENT LOOP — alternate between model steps and local tool execution
        ═══════════════════════════════════════════════════════════ */
-
     /**
-     * Runs the request/tool loop until the assistant answers normally, errors, or the user interrupts.
-     * @returns {Promise<void>}
+     * Run the agent loop until it returns plain text, errors, or is interrupted.
      */
     async function agentLoop() {
       interrupted = false;
@@ -2142,7 +2168,6 @@
           const response = await callLLM(conversationHistory);
           hideTypingIndicator();
 
-          // Check again after the await because Stop can be pressed while the network request is in flight.
           if (interrupted) {
             break;
           }
@@ -2150,16 +2175,17 @@
           if (!response.ok) {
             const errorMessage = response.error || "Unknown API error.";
             addLogEntry("error", errorMessage, { label: "api error" });
+
             if (response.rawText) {
               addLogEntry("assistant", response.rawText, { label: "raw response" });
             }
+
             break;
           }
 
           const assistantReply = normalizeAssistantReply(response);
 
           if (assistantReply.toolCalls.length > 0) {
-            // Preserve the original tool-call envelope so the next model turn can reconcile tool_call_id values.
             const assistantHistoryEntry = {
               role: "assistant",
               content: assistantReply.text || "",
@@ -2174,6 +2200,7 @@
                     }
                   }))
             };
+
             conversationHistory.push(assistantHistoryEntry);
 
             if (assistantReply.text) {
@@ -2185,6 +2212,7 @@
 
             for (const call of assistantReply.toolCalls) {
               const parsed = parseToolArguments(call.rawArgs);
+
               if (!parsed.ok || !call.name) {
                 parseFailed = true;
                 addLogEntry("error", "Tool call parsing failed. Falling back to raw response text.", {
@@ -2193,6 +2221,7 @@
                 addLogEntry("assistant", assistantReply.rawAssistant, { label: "raw response" });
                 break;
               }
+
               parsedCalls.push({
                 id: call.id,
                 name: call.name,
@@ -2205,7 +2234,6 @@
             }
 
             for (const call of parsedCalls) {
-              // Check before each tool so Stop can halt safely between actions instead of halfway through a batch.
               if (interrupted) {
                 break;
               }
@@ -2271,28 +2299,24 @@
     }
 
     /* ═══════════════════════════════════════════════════════════
-       UI EVENT HANDLERS — sidebar interactions for running, stopping, and clearing
+       UI EVENT HANDLERS — control-plane interactions and shortcuts
        ═══════════════════════════════════════════════════════════ */
-
     /**
-     * Mirrors the model input into the badge in the control header.
-     * @returns {void}
+     * Mirror the selected model into the header badge as the user types.
      */
     function handleModelInput() {
       modelBadge.textContent = getSelectedModel();
     }
 
     /**
-     * Clears the transcript without affecting conversation history or world state.
-     * @returns {void}
+     * Clear the execution log without mutating any other harness state.
      */
     function handleClearLogClick() {
       outputLog.innerHTML = "";
     }
 
     /**
-     * Queues the user's prompt and starts the agent loop.
-     * @returns {Promise<void>}
+     * Start a new agent run from the current prompt input.
      */
     async function handleSubmitClick() {
       if (isRunning) {
@@ -2301,6 +2325,7 @@
       }
 
       const prompt = promptInput.value.trim();
+
       if (!prompt) {
         addLogEntry("error", "Prompt is required.", { label: "validation" });
         return;
@@ -2317,11 +2342,11 @@
     }
 
     /**
-     * Requests that the current agent loop stop at the next safe boundary.
-     * @returns {void}
+     * Request interruption and surface whether a run was active.
      */
     function handleStopClick() {
       interrupted = true;
+
       if (isRunning) {
         hideTypingIndicator();
         setStatus("Interrupted", "interrupted");
@@ -2334,9 +2359,7 @@
     }
 
     /**
-     * Lets the user submit with Cmd/Ctrl+Enter from the prompt textarea.
-     * @param {KeyboardEvent} event
-     * @returns {void}
+     * Submit on Cmd/Ctrl+Enter while preserving regular textarea behavior.
      */
     function handlePromptKeydown(event) {
       if ((event.metaKey || event.ctrlKey) && event.key === "Enter") {
@@ -2345,33 +2368,20 @@
       }
     }
 
-    /**
-     * Wires up all control-plane event listeners in one place.
-     * @returns {void}
-     */
-    function bindEventHandlers() {
-      modelInput.addEventListener("input", handleModelInput);
-      clearLogBtn.addEventListener("click", handleClearLogClick);
-      submitButton.addEventListener("click", handleSubmitClick);
-      stopButton.addEventListener("click", handleStopClick);
-      promptInput.addEventListener("keydown", handlePromptKeydown);
-    }
-
     /* ═══════════════════════════════════════════════════════════
-       INITIALIZATION — startup wiring for the static demo world and transcript
+       INITIALIZATION — wire listeners, seed effects, and announce readiness
        ═══════════════════════════════════════════════════════════ */
-
     /**
-     * Seeds the decorative sparkle layer inside the initial retro world.
-     * @returns {void}
+     * Seed the decorative sparkle layer used by the default demo world.
      */
     function initSparkles() {
       const layer = document.getElementById("sparkle-layer");
+
       if (!layer) {
         return;
       }
 
-      for (let index = 0; index < 30; index += 1) {
+      for (let i = 0; i < 30; i += 1) {
         const sparkle = document.createElement("div");
         sparkle.className = "sparkle";
         sparkle.style.left = (Math.random() * 100) + "%";
@@ -2385,11 +2395,21 @@
     }
 
     /**
-     * Performs one-time startup wiring after the static DOM has loaded.
-     * @returns {void}
+     * Attach all protected control-plane event listeners.
+     */
+    function bindEventListeners() {
+      modelInput.addEventListener("input", handleModelInput);
+      clearLogButton.addEventListener("click", handleClearLogClick);
+      submitButton.addEventListener("click", handleSubmitClick);
+      stopButton.addEventListener("click", handleStopClick);
+      promptInput.addEventListener("keydown", handlePromptKeydown);
+    }
+
+    /**
+     * Boot the harness UI and log the initial protected-world notice.
      */
     function initializeHarness() {
-      bindEventHandlers();
+      bindEventListeners();
       handleModelInput();
       initSparkles();
       addLogEntry("status", "Harness ready. The control plane is protected; only #agent-world is mutable.", {
