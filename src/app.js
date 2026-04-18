@@ -24,6 +24,10 @@ import {
   getSelectedModel
 } from "./harness/ui.js";
 
+function greetUser(name) {
+  return `Hello, ${name}! Welcome to the Agent Harness.`;
+}
+
 function restoreSettings(refs) {
   const saved = loadSettings();
   if (saved.apiKey) refs.apiKeyInput.value = saved.apiKey;
