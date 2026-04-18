@@ -133,60 +133,49 @@
       box-shadow: var(--shadow);
       overflow: hidden;
       backdrop-filter: blur(18px);
+      min-height: 0;
     }
 
     .control-header {
-      display: grid;
-      gap: 6px;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 12px;
+      padding-bottom: 2px;
     }
 
     .control-title-row {
       display: flex;
       align-items: center;
       gap: 10px;
+      min-width: 0;
     }
 
     .control-icon {
-      width: 32px;
-      height: 32px;
-      border-radius: 10px;
+      width: 30px;
+      height: 30px;
+      border-radius: 9px;
       background: linear-gradient(135deg, #55d0ff 0%, #4f7cff 100%);
       display: grid;
       place-items: center;
-      font-size: 16px;
+      font-size: 15px;
       flex-shrink: 0;
     }
 
     .control-header h1 {
       margin: 0;
-      font-size: 22px;
+      font-size: 18px;
       line-height: 1.1;
-      background: linear-gradient(135deg, #55d0ff, #61f0c2);
-      -webkit-background-clip: text;
-      -webkit-text-fill-color: transparent;
-      background-clip: text;
+      color: var(--text);
+      -webkit-text-fill-color: currentColor;
     }
 
-    .eyebrow {
-      display: inline-flex;
-      width: fit-content;
+    .control-header-meta {
+      display: flex;
       align-items: center;
+      justify-content: flex-end;
+      flex-wrap: wrap;
       gap: 8px;
-      padding: 5px 10px;
-      border: 1px solid rgba(97, 240, 194, 0.2);
-      border-radius: 999px;
-      background: rgba(97, 240, 194, 0.08);
-      color: var(--accent-2);
-      font-size: 11px;
-      letter-spacing: 0.08em;
-      text-transform: uppercase;
-    }
-
-    .control-header p {
-      margin: 0;
-      color: var(--muted);
-      font-size: 13px;
-      line-height: 1.5;
     }
 
     .model-badge {
@@ -207,6 +196,57 @@
       font-size: 8px;
     }
 
+    .settings-bar {
+      display: grid;
+      gap: 10px;
+      padding: 12px;
+      border: 1px solid var(--line);
+      border-radius: 16px;
+      background: rgba(255, 255, 255, 0.025);
+    }
+
+    .settings-toggle {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 12px;
+      width: 100%;
+      padding: 0;
+      border: 0;
+      background: transparent;
+      color: var(--text);
+      text-align: left;
+      box-shadow: none;
+    }
+
+    .settings-toggle:hover:not(:disabled),
+    .settings-toggle:active:not(:disabled) {
+      transform: none;
+      filter: none;
+    }
+
+    .settings-summary {
+      min-width: 0;
+      color: #d8e4fb;
+      font-size: 13px;
+      font-weight: 600;
+      white-space: nowrap;
+      overflow: hidden;
+      text-overflow: ellipsis;
+    }
+
+    .settings-chevron {
+      color: var(--muted);
+      font-size: 14px;
+      line-height: 1;
+      flex-shrink: 0;
+    }
+
+    .settings-body {
+      display: grid;
+      gap: 10px;
+    }
+
     .field-grid {
       display: grid;
       gap: 12px;
@@ -217,10 +257,29 @@
       gap: 6px;
     }
 
-    .button-row {
+    .input-area {
+      padding: 12px;
+      border: 1px solid var(--line);
+      border-radius: 16px;
+      background: rgba(255, 255, 255, 0.03);
+    }
+
+    .input-row {
+      display: flex;
+      align-items: flex-end;
+      gap: 10px;
+    }
+
+    .input-buttons {
       display: grid;
       grid-template-columns: 1fr 1fr;
       gap: 10px;
+      flex-shrink: 0;
+    }
+
+    #prompt-input {
+      min-height: 72px;
+      resize: vertical;
     }
 
     button {
@@ -348,7 +407,7 @@
     #output-log {
       flex: 1;
       min-height: 120px;
-      overflow: auto;
+      overflow-y: auto;
       padding-right: 4px;
       display: grid;
       gap: 6px;
@@ -596,22 +655,6 @@
     /* ═══════════════════════════════════════════════════════════
        STATUS INDICATORS — runtime state chips and attention cues
        ═══════════════════════════════════════════════════════════ */
-    .status-row {
-      display: flex;
-      justify-content: space-between;
-      align-items: center;
-      gap: 12px;
-      padding: 10px 14px;
-      border: 1px solid var(--line);
-      border-radius: 14px;
-      background: rgba(255, 255, 255, 0.02);
-    }
-
-    .status-label {
-      color: var(--muted);
-      font-size: 13px;
-    }
-
     .status-pill {
       padding: 5px 10px;
       border-radius: 999px;
@@ -645,6 +688,26 @@
         box-shadow: 0 0 0 6px rgba(97, 240, 194, 0);
       }
     }
+
+    @media (max-width: 720px) {
+      .control-header {
+        align-items: flex-start;
+        flex-direction: column;
+      }
+
+      .control-header-meta {
+        justify-content: flex-start;
+      }
+
+      .input-row {
+        align-items: stretch;
+        flex-direction: column;
+      }
+
+      .input-buttons {
+        grid-template-columns: repeat(2, minmax(0, 1fr));
+      }
+    }
   </style>
 </head>
 <body>
@@ -654,48 +717,38 @@
   <div id="agent-control">
     <!-- Header and model badge remain fixed while the world changes. -->
     <div class="control-header">
-      <div class="eyebrow">Protected Control Plane</div>
       <div class="control-title-row">
         <div class="control-icon">&#9881;</div>
         <h1>Agent Control</h1>
       </div>
-      <p>Describe the change you want and let the model update only the mutable world pane.</p>
-      <div class="model-badge" id="model-badge">glm-5.1</div>
+      <div class="control-header-meta">
+        <div class="status-pill idle" id="runtime-status">Idle</div>
+        <div class="model-badge" id="model-badge">glm-5.1</div>
+      </div>
     </div>
 
-    <!-- Runtime status is read-only feedback about the current agent loop. -->
-    <div class="status-row">
-      <div>
-        <div class="status-label">Runtime status</div>
-      </div>
-      <div class="status-pill idle" id="runtime-status">Idle</div>
-    </div>
+    <div class="settings-bar">
+      <button class="settings-toggle" type="button" onclick="toggleSettings()">
+        <span class="settings-summary" id="settings-summary">&#9881; glm-5.1 &middot; api.z.ai</span>
+        <span class="settings-chevron" id="settings-chevron">&#9662;</span>
+      </button>
+      <div class="settings-body" id="settings-body" style="display: none;">
+        <div class="field-grid">
+          <div class="field">
+            <label for="api-key">API Key</label>
+            <input id="api-key" type="password" placeholder="Enter API Key" autocomplete="off">
+          </div>
 
-    <!-- Input controls drive the LLM request without exposing the mutable world. -->
-    <div class="field-grid">
-      <div class="field">
-        <label for="api-key">API Key</label>
-        <input id="api-key" type="password" placeholder="Enter API Key" autocomplete="off">
-      </div>
+          <div class="field">
+            <label for="model-select">Model</label>
+            <input id="model-select" type="text" value="glm-5.1" spellcheck="false" autocomplete="off">
+          </div>
 
-      <div class="field">
-        <label for="model-select">Model</label>
-        <input id="model-select" type="text" value="glm-5.1" spellcheck="false" autocomplete="off">
-      </div>
-
-      <div class="field">
-        <label for="api-endpoint">API Endpoint</label>
-        <input id="api-endpoint" type="text" value="https://api.z.ai/api/coding/paas/v4" spellcheck="false" autocomplete="off">
-      </div>
-
-      <div class="field">
-        <label for="prompt-input">Prompt</label>
-        <textarea id="prompt-input" placeholder="Example: Turn the page into a fake pizza fan profile with animated stickers."></textarea>
-      </div>
-
-      <div class="button-row">
-        <button id="submit-button" type="button">Run Agent</button>
-        <button id="stop-button" type="button">Stop</button>
+          <div class="field">
+            <label for="api-endpoint">API Endpoint</label>
+            <input id="api-endpoint" type="text" value="https://api.z.ai/api/coding/paas/v4" spellcheck="false" autocomplete="off">
+          </div>
+        </div>
       </div>
     </div>
 
@@ -709,6 +762,19 @@
         </div>
       </div>
       <div id="output-log" aria-live="polite"></div>
+    </div>
+
+    <div class="input-area">
+      <div class="field">
+        <label for="prompt-input">Prompt</label>
+        <div class="input-row">
+          <textarea id="prompt-input" rows="2" placeholder="Example: Turn the page into a fake pizza fan profile with animated stickers."></textarea>
+          <div class="input-buttons">
+            <button id="submit-button" type="button">Run</button>
+            <button id="stop-button" type="button">Stop</button>
+          </div>
+        </div>
+      </div>
     </div>
   </div>
 
@@ -1572,8 +1638,13 @@
      * Append a ready-made entry node to the output log.
      */
     function appendLogEntry(entry) {
+      const isNearBottom = outputLog.scrollHeight - outputLog.scrollTop - outputLog.clientHeight < 100;
       outputLog.appendChild(entry);
-      scrollLogToBottom();
+
+      if (isNearBottom) {
+        scrollLogToBottom();
+      }
+
       return entry;
     }
 
@@ -1588,8 +1659,12 @@
       typingIndicator = document.createElement("div");
       typingIndicator.className = "typing-indicator";
       typingIndicator.innerHTML = "<div class=\"dot\"></div><div class=\"dot\"></div><div class=\"dot\"></div>";
+      const isNearBottom = outputLog.scrollHeight - outputLog.scrollTop - outputLog.clientHeight < 100;
       outputLog.appendChild(typingIndicator);
-      scrollLogToBottom();
+
+      if (isNearBottom) {
+        scrollLogToBottom();
+      }
     }
 
     /**
@@ -1676,7 +1751,42 @@
         entry.appendChild(body);
       }
 
-      return appendLogEntry(entry);
+      const appended = appendLogEntry(entry);
+      const log = document.getElementById("output-log");
+      const isNearBottom = log.scrollHeight - log.scrollTop - log.clientHeight < 100;
+
+      if (isNearBottom) {
+        log.scrollTop = log.scrollHeight;
+      }
+
+      return appended;
+    }
+
+    /**
+     * Toggle the compact settings drawer in the control panel.
+     */
+    function toggleSettings() {
+      const settingsBody = document.getElementById("settings-body");
+      const settingsSummary = document.getElementById("settings-summary");
+      const settingsChevron = document.getElementById("settings-chevron");
+
+      if (!settingsBody || !settingsSummary || !settingsChevron) {
+        return;
+      }
+
+      let endpointHost = "api.z.ai";
+
+      try {
+        endpointHost = new URL(apiEndpointInput.value.trim() || DEFAULT_API_ENDPOINT).host || endpointHost;
+      } catch (error) {
+        endpointHost = "api.z.ai";
+      }
+
+      settingsSummary.textContent = "\u2699 " + getSelectedModel() + " \u00B7 " + endpointHost;
+
+      const isOpen = settingsBody.style.display !== "none";
+      settingsBody.style.display = isOpen ? "none" : "grid";
+      settingsChevron.textContent = isOpen ? "\u25BE" : "\u25B4";
     }
 
     /**
