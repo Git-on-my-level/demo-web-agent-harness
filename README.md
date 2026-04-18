@@ -30,3 +30,7 @@ python3 -m http.server 4173
 ```
 
 Then open `http://localhost:4173`.
+
+## CAR Dogfood Report
+
+This repository was used as a dogfood target for CAR's PMA capabilities during a demo. The work focused on exercising the ticket-driven workflow by applying a small, scoped documentation change in-repo.
