@@ -166,6 +166,7 @@ export function createMobileNavHandler({ agentControl, agentWorld, mobileNav }) 
   if (!mobileNav || !agentControl || !agentWorld) return function() {};
 
   var currentView = "agent-control";
+  var SIZE = 52;
 
   function switchView(targetId) {
     currentView = targetId;
@@ -175,10 +176,10 @@ export function createMobileNavHandler({ agentControl, agentWorld, mobileNav }) 
     var icon = mobileNav.querySelector("#toggle-icon");
     var label = mobileNav.querySelector("#toggle-label");
     if (targetId === "agent-control") {
-      if (icon) icon.innerHTML = "&#9733;";
+      if (icon) icon.textContent = "\u21C4";
       if (label) label.textContent = "preview";
     } else {
-      if (icon) icon.innerHTML = "&#9881;";
+      if (icon) icon.textContent = "\u21C4";
       if (label) label.textContent = "control";
     }
   }
@@ -187,67 +188,54 @@ export function createMobileNavHandler({ agentControl, agentWorld, mobileNav }) 
   var hasMoved = false;
   var startX = 0;
   var startY = 0;
-  var offsetX = 0;
-  var offsetY = 0;
 
-  function positionDefault() {
+  function setPositionFromTouch(touch) {
+    var x = touch.clientX - SIZE / 2;
+    var y = touch.clientY - SIZE / 2;
     var vw = window.innerWidth;
     var vh = window.innerHeight;
-    var safeBottom = parseInt(getComputedStyle(document.documentElement).getPropertyValue("env(safe-area-inset-bottom)")) || 0;
-    mobileNav.style.right = "16px";
-    mobileNav.style.bottom = (24 + safeBottom) + "px";
-    mobileNav.style.left = "auto";
-    mobileNav.style.top = "auto";
-    offsetX = vw - 16 - 52;
-    offsetY = vh - 24 - 52 - safeBottom;
-  }
-
-  function clampPosition() {
-    var vw = window.innerWidth;
-    var vh = window.innerHeight;
-    var r = mobileNav.getBoundingClientRect();
-    var half = r.width / 2;
-    var x = Math.max(half, Math.min(vw - half, offsetX + r.width / 2)) - half;
-    var y = Math.max(half, Math.min(vh - half, offsetY + r.height / 2)) - half;
+    x = Math.max(4, Math.min(vw - SIZE - 4, x));
+    y = Math.max(4, Math.min(vh - SIZE - 4, y));
     mobileNav.style.left = x + "px";
     mobileNav.style.top = y + "px";
     mobileNav.style.right = "auto";
     mobileNav.style.bottom = "auto";
-    offsetX = x;
-    offsetY = y;
   }
 
-  function onPointerDown(e) {
-    if (e.pointerId == null) return;
-    isDragging = true;
-    hasMoved = false;
-    startX = e.clientX;
-    startY = e.clientY;
-    mobileNav.setPointerCapture(e.pointerId);
-    mobileNav.classList.add("dragging");
-    e.preventDefault();
-  }
-
-  function onPointerMove(e) {
-    if (!isDragging) return;
-    var dx = e.clientX - startX;
-    var dy = e.clientY - startY;
-    if (Math.abs(dx) > 3 || Math.abs(dy) > 3) hasMoved = true;
-    if (!hasMoved) return;
-    var r = mobileNav.getBoundingClientRect();
-    var newX = r.left + dx;
-    var newY = r.top + dy;
-    mobileNav.style.left = newX + "px";
-    mobileNav.style.top = newY + "px";
+  function positionDefault() {
+    var vw = window.innerWidth;
+    var vh = window.innerHeight;
+    var x = vw - SIZE - 16;
+    var y = vh - SIZE - 32;
+    mobileNav.style.left = x + "px";
+    mobileNav.style.top = y + "px";
     mobileNav.style.right = "auto";
     mobileNav.style.bottom = "auto";
-    offsetX = newX;
-    offsetY = newY;
-    startX = e.clientX;
-    startY = e.clientY;
   }
 
-  function onPointerUp(e) {
+  function onTouchStart(e) {
+    var touch = e.touches[0];
+    isDragging = true;
+    hasMoved = false;
+    startX = touch.clientX;
+    startY = touch.clientY;
+    mobileNav.classList.add("dragging");
+  }
+
+  function onTouchMove(e) {
+    if (!isDragging) return;
+    e.preventDefault();
+    var touch = e.touches[0];
+    var dx = touch.clientX - startX;
+    var dy = touch.clientY - startY;
+    if (Math.abs(dx) > 4 || Math.abs(dy) > 4) hasMoved = true;
+    if (!hasMoved) return;
+    setPositionFromTouch(touch);
+    startX = touch.clientX;
+    startY = touch.clientY;
+  }
+
+  function onTouchEnd() {
     if (!isDragging) return;
     isDragging = false;
     mobileNav.classList.remove("dragging");
@@ -255,13 +243,19 @@ export function createMobileNavHandler({ agentControl, agentWorld, mobileNav }) 
       var next = currentView === "agent-control" ? "agent-world" : "agent-control";
       switchView(next);
     }
-    clampPosition();
   }
 
-  mobileNav.addEventListener("pointerdown", onPointerDown);
-  mobileNav.addEventListener("pointermove", onPointerMove);
-  mobileNav.addEventListener("pointerup", onPointerUp);
-  mobileNav.addEventListener("pointercancel", onPointerUp);
+  mobileNav.addEventListener("touchstart", onTouchStart, { passive: true });
+  mobileNav.addEventListener("touchmove", onTouchMove, { passive: false });
+  mobileNav.addEventListener("touchend", onTouchEnd);
+  mobileNav.addEventListener("touchcancel", onTouchEnd);
+
+  mobileNav.addEventListener("click", function(e) {
+    e.preventDefault();
+    if (hasMoved) return;
+    var next = currentView === "agent-control" ? "agent-world" : "agent-control";
+    switchView(next);
+  });
 
   var mql = window.matchMedia("(max-width: 1023px)");
   function onBreakpoint() {
