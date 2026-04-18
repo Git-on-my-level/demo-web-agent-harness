@@ -594,506 +594,6 @@
     }
 
     /* ═══════════════════════════════════════════════════════════
-       RETRO THEME — default mutable world seed content and animations
-       ═══════════════════════════════════════════════════════════ */
-    #agent-world {
-      color: #111;
-    }
-
-    @keyframes sparkleFloat {
-      0%,
-      100% {
-        opacity: 0;
-        transform: translateY(0) scale(0.5);
-      }
-
-      50% {
-        opacity: 1;
-        transform: translateY(-18px) scale(1);
-      }
-    }
-
-    @keyframes rainbowShift {
-      0% {
-        filter: hue-rotate(0deg);
-      }
-
-      100% {
-        filter: hue-rotate(360deg);
-      }
-    }
-
-    @keyframes gradientShift {
-      0% {
-        background-position: 0% 50%;
-      }
-
-      50% {
-        background-position: 100% 50%;
-      }
-
-      100% {
-        background-position: 0% 50%;
-      }
-    }
-
-    @keyframes marqueeScroll {
-      0% {
-        transform: translateX(100%);
-      }
-
-      100% {
-        transform: translateX(-100%);
-      }
-    }
-
-    @keyframes blink {
-      50% {
-        opacity: 0.2;
-      }
-    }
-
-    @keyframes pulse {
-      0%,
-      100% {
-        transform: scale(1);
-      }
-
-      50% {
-        transform: scale(1.05);
-      }
-    }
-
-    @keyframes glowPulse {
-      0%,
-      100% {
-        box-shadow: 0 0 8px rgba(255, 0, 200, 0.4), 0 0 20px rgba(255, 0, 200, 0.2);
-      }
-
-      50% {
-        box-shadow: 0 0 16px rgba(255, 0, 200, 0.7), 0 0 40px rgba(255, 0, 200, 0.4);
-      }
-    }
-
-    #agent-world .retro-page {
-      position: relative;
-      min-height: 100%;
-      padding: 0;
-      overflow: hidden;
-      background: linear-gradient(135deg, #ff00ff22, #00ffff18, #00ff0012, #ff00ff22);
-      background-size: 400% 400%;
-      animation: gradientShift 12s ease infinite;
-      font-family: "Comic Sans MS", "Chalkboard SE", Verdana, Tahoma, sans-serif;
-    }
-
-    #agent-world .sparkle-layer {
-      position: absolute;
-      top: 0;
-      left: 0;
-      z-index: 0;
-      width: 100%;
-      height: 100%;
-      overflow: hidden;
-      pointer-events: none;
-    }
-
-    #agent-world .sparkle {
-      position: absolute;
-      width: 4px;
-      height: 4px;
-      border-radius: 50%;
-      background: #fff;
-      animation: sparkleFloat 3s ease-in-out infinite;
-    }
-
-    #agent-world .retro-shell {
-      position: relative;
-      z-index: 1;
-      max-width: 1060px;
-      margin: 0 auto;
-      border: 5px ridge #c0c0c0;
-      background: #fff;
-      box-shadow:
-        0 0 0 3px #ff00c8,
-        0 0 0 6px #00ffff,
-        0 0 30px rgba(255, 0, 200, 0.3),
-        0 0 60px rgba(0, 255, 255, 0.15);
-    }
-
-    #agent-world .retro-banner {
-      position: relative;
-      padding: 20px 22px;
-      border-bottom: 5px solid #ffef7a;
-      color: #fff;
-      text-align: center;
-      background: linear-gradient(90deg, #ff00c8, #ff5db8, #7348ff, #27b3ff, #00ff88, #ff00c8);
-      background-size: 300% 100%;
-      animation: gradientShift 6s ease infinite;
-    }
-
-    #agent-world .retro-banner h2,
-    #agent-world .retro-banner p {
-      margin: 0;
-    }
-
-    #agent-world .retro-banner h2 {
-      display: inline-block;
-      font-size: 36px;
-      text-shadow:
-        3px 3px 0 #4a178d,
-        -1px -1px 0 #ff00c8,
-        0 0 20px rgba(255, 255, 255, 0.5);
-      animation: rainbowShift 4s linear infinite;
-    }
-
-    #agent-world .retro-banner p {
-      margin-top: 8px;
-      font-size: 13px;
-      text-shadow: 1px 1px 0 rgba(0, 0, 0, 0.4);
-    }
-
-    #agent-world .marquee-bar {
-      position: relative;
-      z-index: 1;
-      padding: 8px 0;
-      overflow: hidden;
-      white-space: nowrap;
-      background: linear-gradient(90deg, #ff00c8, #7348ff, #00ff88, #ff00c8);
-      background-size: 300% 100%;
-      animation: gradientShift 4s ease infinite;
-    }
-
-    #agent-world .marquee-text {
-      display: inline-block;
-      color: #fff;
-      font-size: 14px;
-      font-weight: 700;
-      letter-spacing: 0.05em;
-      text-shadow: 1px 1px 0 rgba(0, 0, 0, 0.4);
-      animation: marqueeScroll 18s linear infinite;
-    }
-
-    #agent-world .visitor-counter {
-      position: relative;
-      z-index: 1;
-      padding: 10px;
-      border-top: 2px solid #333;
-      border-bottom: 2px solid #333;
-      background: #000;
-      color: #00ff00;
-      text-align: center;
-      font-family: "Courier New", monospace;
-      font-size: 13px;
-      font-weight: 700;
-      letter-spacing: 0.1em;
-    }
-
-    #agent-world .visitor-counter .counter-digits {
-      display: inline-block;
-      margin-left: 6px;
-      padding: 4px 12px;
-      border: 2px inset #444;
-      background: #111;
-      color: #00ff00;
-      font-size: 16px;
-      letter-spacing: 0.15em;
-    }
-
-    #agent-world .retro-grid {
-      position: relative;
-      z-index: 1;
-      display: grid;
-      grid-template-columns: 300px minmax(0, 1fr);
-      gap: 16px;
-      padding: 16px;
-    }
-
-    #agent-world .retro-card {
-      border: 3px solid #244db7;
-      background: #fdfdfd;
-      box-shadow: 3px 3px 0 rgba(0, 0, 0, 0.15);
-    }
-
-    #agent-world .retro-card h3 {
-      margin: 0;
-      padding: 8px 12px;
-      color: #fff;
-      font-size: 14px;
-      text-transform: uppercase;
-      letter-spacing: 0.06em;
-      text-shadow: 1px 1px 0 rgba(0, 0, 0, 0.3);
-      background: linear-gradient(180deg, #3c7cff 0%, #0b43b6 100%);
-    }
-
-    #agent-world .retro-card-body {
-      padding: 14px;
-    }
-
-    #agent-world .profile-box {
-      display: grid;
-      grid-template-columns: 110px minmax(0, 1fr);
-      gap: 14px;
-      align-items: center;
-    }
-
-    #agent-world .avatar {
-      width: 110px;
-      height: 110px;
-      display: grid;
-      place-items: center;
-      border: 5px ridge #ffd84f;
-      background: radial-gradient(circle at 35% 30%, #fff6a6 0%, #f6a500 40%, #ea4ca5 100%);
-      color: #fff;
-      font-weight: 700;
-      font-size: 13px;
-      text-align: center;
-      text-shadow: 1px 1px 2px rgba(0, 0, 0, 0.5);
-      animation: glowPulse 2s ease-in-out infinite;
-    }
-
-    #agent-world .tagline {
-      margin: 6px 0 0;
-      color: #a11f76;
-      font-weight: 700;
-      font-size: 13px;
-    }
-
-    #agent-world .blink {
-      color: #d31717;
-      font-weight: 700;
-      animation: blink 1.2s step-end infinite;
-    }
-
-    #agent-world .mood-indicator {
-      display: flex;
-      align-items: center;
-      gap: 8px;
-      margin-top: 10px;
-      padding: 10px;
-      border: 3px double #ff00c8;
-      background: linear-gradient(135deg, #fff0fa, #ffe6f7);
-      font-size: 13px;
-    }
-
-    #agent-world .mood-emoji {
-      font-size: 24px;
-      animation: pulse 1.5s ease-in-out infinite;
-    }
-
-    #agent-world .stats {
-      margin-top: 10px;
-      padding: 10px;
-      border: 2px dashed #ff59a8;
-      background: #fff4fb;
-      font-size: 13px;
-      line-height: 1.6;
-    }
-
-    #agent-world .friends-list {
-      display: grid;
-      grid-template-columns: repeat(2, minmax(0, 1fr));
-      gap: 10px;
-    }
-
-    #agent-world .friend {
-      padding: 10px;
-      border: 2px solid #ffd84f;
-      background: #fff9d5;
-      text-align: center;
-      font-size: 11px;
-      box-shadow: 2px 2px 0 rgba(0, 0, 0, 0.08);
-      transition: transform 0.15s ease;
-    }
-
-    #agent-world .friend:hover {
-      transform: scale(1.04);
-    }
-
-    #agent-world .friend-avatar {
-      width: 44px;
-      height: 44px;
-      display: grid;
-      place-items: center;
-      margin: 0 auto 6px;
-      border: 2px solid #fff;
-      border-radius: 50%;
-      color: #fff;
-      font-weight: 700;
-      font-size: 13px;
-      text-shadow: 1px 1px 0 rgba(0, 0, 0, 0.3);
-      box-shadow: 2px 2px 4px rgba(0, 0, 0, 0.15);
-    }
-
-    #agent-world .friend:nth-child(1) .friend-avatar {
-      background: linear-gradient(135deg, #ff00c8, #ff5db8);
-    }
-
-    #agent-world .friend:nth-child(2) .friend-avatar {
-      background: linear-gradient(135deg, #00ccff, #0066ff);
-    }
-
-    #agent-world .friend:nth-child(3) .friend-avatar {
-      background: linear-gradient(135deg, #00ff88, #00cc44);
-    }
-
-    #agent-world .friend:nth-child(4) .friend-avatar {
-      background: linear-gradient(135deg, #ff6600, #ffcc00);
-    }
-
-    #agent-world .friend:nth-child(5) .friend-avatar {
-      background: linear-gradient(135deg, #aa00ff, #ff00aa);
-    }
-
-    #agent-world .friend:nth-child(6) .friend-avatar {
-      background: linear-gradient(135deg, #ff0044, #ff6600);
-    }
-
-    #agent-world .friend:nth-child(7) .friend-avatar {
-      background: linear-gradient(135deg, #00ffcc, #0088ff);
-    }
-
-    #agent-world .friend:nth-child(8) .friend-avatar {
-      background: linear-gradient(135deg, #ffcc00, #ff0066);
-    }
-
-    #agent-world .friend:nth-child(9) .friend-avatar {
-      background: linear-gradient(135deg, #66ff00, #00ccff);
-    }
-
-    #agent-world .friend:nth-child(10) .friend-avatar {
-      background: linear-gradient(135deg, #ff00ff, #00ffff);
-    }
-
-    #agent-world .music-player {
-      display: grid;
-      gap: 10px;
-      color: #172343;
-    }
-
-    #agent-world .track {
-      padding: 10px;
-      border: 2px inset #d9e2ff;
-      background: #eef3ff;
-      font-size: 13px;
-    }
-
-    #agent-world .track-list {
-      display: grid;
-      gap: 4px;
-      margin-top: 8px;
-    }
-
-    #agent-world .track-item {
-      display: flex;
-      justify-content: space-between;
-      align-items: center;
-      padding: 6px 8px;
-      border: 1px solid #d0d8f0;
-      background: #f5f8ff;
-      font-size: 12px;
-    }
-
-    #agent-world .track-item .track-num {
-      margin-right: 6px;
-      color: #4f74d9;
-      font-weight: 700;
-    }
-
-    #agent-world .track-item .track-dur {
-      color: #888;
-      font-family: "Courier New", monospace;
-      font-size: 11px;
-    }
-
-    #agent-world .progress-bar {
-      position: relative;
-      width: 100%;
-      height: 10px;
-      border: 2px inset #c0c0c0;
-      background: #ddd;
-    }
-
-    #agent-world .progress-fill {
-      width: 35%;
-      height: 100%;
-      background: linear-gradient(90deg, #3c7cff, #7348ff);
-    }
-
-    #agent-world .player-controls {
-      display: flex;
-      gap: 6px;
-    }
-
-    #agent-world .player-controls button {
-      flex: 1;
-      padding: 8px 10px;
-      border: 2px outset #fff;
-      background: linear-gradient(180deg, #fefefe 0%, #c4d4ff 100%);
-      color: #10224b;
-      font-weight: 700;
-      font-size: 12px;
-      cursor: pointer;
-      box-shadow: 1px 1px 0 rgba(0, 0, 0, 0.15);
-    }
-
-    #agent-world .player-controls button:active {
-      border-style: inset;
-    }
-
-    #agent-world .about-copy {
-      line-height: 1.7;
-      font-size: 14px;
-    }
-
-    #agent-world .hero-box {
-      margin-bottom: 14px;
-      padding: 14px;
-      border: 3px dashed #ff7dd0;
-      background: linear-gradient(135deg, #fff0fa, #ffe6f7);
-      text-shadow: 0 0 1px rgba(255, 0, 200, 0.1);
-    }
-
-    #agent-world .stamp-row {
-      display: flex;
-      flex-wrap: wrap;
-      gap: 8px;
-      margin-top: 14px;
-    }
-
-    #agent-world .stamp {
-      padding: 6px 10px;
-      border: 2px solid #0b43b6;
-      background: linear-gradient(180deg, #fff 0%, #dfe8ff 100%);
-      color: #b0127e;
-      font-size: 11px;
-      font-weight: 700;
-      box-shadow: 2px 2px 0 rgba(0, 0, 0, 0.1);
-    }
-
-    #agent-world .meet-section {
-      padding: 12px;
-      border: 2px solid #00ff88;
-      background: linear-gradient(135deg, #f0fff4, #e6ffe6);
-      font-size: 13px;
-      line-height: 1.6;
-    }
-
-    #agent-world .meet-section ul {
-      margin: 8px 0 0;
-      padding-left: 18px;
-    }
-
-    #agent-world .meet-section li {
-      margin-bottom: 4px;
-    }
-
-    @media (max-width: 860px) {
-      #agent-world .retro-grid {
-        grid-template-columns: 1fr;
-      }
-    }
-
-    /* ═══════════════════════════════════════════════════════════
        STATUS INDICATORS — runtime state chips and attention cues
        ═══════════════════════════════════════════════════════════ */
     .status-row {
@@ -1216,6 +716,508 @@
        WORLD CONTAINER — the only region the agent is allowed to change
        ═══════════════════════════════════════════════════════════ -->
   <div id="agent-world">
+    <style data-agent-style="active">
+      /* ═══════════════════════════════════════════════════════════
+         RETRO THEME — default mutable world seed content and animations
+         ═══════════════════════════════════════════════════════════ */
+      #agent-world {
+        color: #111;
+      }
+
+      @keyframes sparkleFloat {
+        0%,
+        100% {
+          opacity: 0;
+          transform: translateY(0) scale(0.5);
+        }
+
+        50% {
+          opacity: 1;
+          transform: translateY(-18px) scale(1);
+        }
+      }
+
+      @keyframes rainbowShift {
+        0% {
+          filter: hue-rotate(0deg);
+        }
+
+        100% {
+          filter: hue-rotate(360deg);
+        }
+      }
+
+      @keyframes gradientShift {
+        0% {
+          background-position: 0% 50%;
+        }
+
+        50% {
+          background-position: 100% 50%;
+        }
+
+        100% {
+          background-position: 0% 50%;
+        }
+      }
+
+      @keyframes marqueeScroll {
+        0% {
+          transform: translateX(100%);
+        }
+
+        100% {
+          transform: translateX(-100%);
+        }
+      }
+
+      @keyframes blink {
+        50% {
+          opacity: 0.2;
+        }
+      }
+
+      @keyframes pulse {
+        0%,
+        100% {
+          transform: scale(1);
+        }
+
+        50% {
+          transform: scale(1.05);
+        }
+      }
+
+      @keyframes glowPulse {
+        0%,
+        100% {
+          box-shadow: 0 0 8px rgba(255, 0, 200, 0.4), 0 0 20px rgba(255, 0, 200, 0.2);
+        }
+
+        50% {
+          box-shadow: 0 0 16px rgba(255, 0, 200, 0.7), 0 0 40px rgba(255, 0, 200, 0.4);
+        }
+      }
+
+      #agent-world .retro-page {
+        position: relative;
+        min-height: 100%;
+        padding: 0;
+        overflow: hidden;
+        background: linear-gradient(135deg, #ff00ff22, #00ffff18, #00ff0012, #ff00ff22);
+        background-size: 400% 400%;
+        animation: gradientShift 12s ease infinite;
+        font-family: "Comic Sans MS", "Chalkboard SE", Verdana, Tahoma, sans-serif;
+      }
+
+      #agent-world .sparkle-layer {
+        position: absolute;
+        top: 0;
+        left: 0;
+        z-index: 0;
+        width: 100%;
+        height: 100%;
+        overflow: hidden;
+        pointer-events: none;
+      }
+
+      #agent-world .sparkle {
+        position: absolute;
+        width: 4px;
+        height: 4px;
+        border-radius: 50%;
+        background: #fff;
+        animation: sparkleFloat 3s ease-in-out infinite;
+      }
+
+      #agent-world .retro-shell {
+        position: relative;
+        z-index: 1;
+        max-width: 1060px;
+        margin: 0 auto;
+        border: 5px ridge #c0c0c0;
+        background: #fff;
+        box-shadow:
+          0 0 0 3px #ff00c8,
+          0 0 0 6px #00ffff,
+          0 0 30px rgba(255, 0, 200, 0.3),
+          0 0 60px rgba(0, 255, 255, 0.15);
+      }
+
+      #agent-world .retro-banner {
+        position: relative;
+        padding: 20px 22px;
+        border-bottom: 5px solid #ffef7a;
+        color: #fff;
+        text-align: center;
+        background: linear-gradient(90deg, #ff00c8, #ff5db8, #7348ff, #27b3ff, #00ff88, #ff00c8);
+        background-size: 300% 100%;
+        animation: gradientShift 6s ease infinite;
+      }
+
+      #agent-world .retro-banner h2,
+      #agent-world .retro-banner p {
+        margin: 0;
+      }
+
+      #agent-world .retro-banner h2 {
+        display: inline-block;
+        font-size: 36px;
+        text-shadow:
+          3px 3px 0 #4a178d,
+          -1px -1px 0 #ff00c8,
+          0 0 20px rgba(255, 255, 255, 0.5);
+        animation: rainbowShift 4s linear infinite;
+      }
+
+      #agent-world .retro-banner p {
+        margin-top: 8px;
+        font-size: 13px;
+        text-shadow: 1px 1px 0 rgba(0, 0, 0, 0.4);
+      }
+
+      #agent-world .marquee-bar {
+        position: relative;
+        z-index: 1;
+        padding: 8px 0;
+        overflow: hidden;
+        white-space: nowrap;
+        background: linear-gradient(90deg, #ff00c8, #7348ff, #00ff88, #ff00c8);
+        background-size: 300% 100%;
+        animation: gradientShift 4s ease infinite;
+      }
+
+      #agent-world .marquee-text {
+        display: inline-block;
+        color: #fff;
+        font-size: 14px;
+        font-weight: 700;
+        letter-spacing: 0.05em;
+        text-shadow: 1px 1px 0 rgba(0, 0, 0, 0.4);
+        animation: marqueeScroll 18s linear infinite;
+      }
+
+      #agent-world .visitor-counter {
+        position: relative;
+        z-index: 1;
+        padding: 10px;
+        border-top: 2px solid #333;
+        border-bottom: 2px solid #333;
+        background: #000;
+        color: #00ff00;
+        text-align: center;
+        font-family: "Courier New", monospace;
+        font-size: 13px;
+        font-weight: 700;
+        letter-spacing: 0.1em;
+      }
+
+      #agent-world .visitor-counter .counter-digits {
+        display: inline-block;
+        margin-left: 6px;
+        padding: 4px 12px;
+        border: 2px inset #444;
+        background: #111;
+        color: #00ff00;
+        font-size: 16px;
+        letter-spacing: 0.15em;
+      }
+
+      #agent-world .retro-grid {
+        position: relative;
+        z-index: 1;
+        display: grid;
+        grid-template-columns: 300px minmax(0, 1fr);
+        gap: 16px;
+        padding: 16px;
+      }
+
+      #agent-world .retro-card {
+        border: 3px solid #244db7;
+        background: #fdfdfd;
+        box-shadow: 3px 3px 0 rgba(0, 0, 0, 0.15);
+      }
+
+      #agent-world .retro-card h3 {
+        margin: 0;
+        padding: 8px 12px;
+        color: #fff;
+        font-size: 14px;
+        text-transform: uppercase;
+        letter-spacing: 0.06em;
+        text-shadow: 1px 1px 0 rgba(0, 0, 0, 0.3);
+        background: linear-gradient(180deg, #3c7cff 0%, #0b43b6 100%);
+      }
+
+      #agent-world .retro-card-body {
+        padding: 14px;
+      }
+
+      #agent-world .profile-box {
+        display: grid;
+        grid-template-columns: 110px minmax(0, 1fr);
+        gap: 14px;
+        align-items: center;
+      }
+
+      #agent-world .avatar {
+        width: 110px;
+        height: 110px;
+        display: grid;
+        place-items: center;
+        border: 5px ridge #ffd84f;
+        background: radial-gradient(circle at 35% 30%, #fff6a6 0%, #f6a500 40%, #ea4ca5 100%);
+        color: #fff;
+        font-weight: 700;
+        font-size: 13px;
+        text-align: center;
+        text-shadow: 1px 1px 2px rgba(0, 0, 0, 0.5);
+        animation: glowPulse 2s ease-in-out infinite;
+      }
+
+      #agent-world .tagline {
+        margin: 6px 0 0;
+        color: #a11f76;
+        font-weight: 700;
+        font-size: 13px;
+      }
+
+      #agent-world .blink {
+        color: #d31717;
+        font-weight: 700;
+        animation: blink 1.2s step-end infinite;
+      }
+
+      #agent-world .mood-indicator {
+        display: flex;
+        align-items: center;
+        gap: 8px;
+        margin-top: 10px;
+        padding: 10px;
+        border: 3px double #ff00c8;
+        background: linear-gradient(135deg, #fff0fa, #ffe6f7);
+        font-size: 13px;
+      }
+
+      #agent-world .mood-emoji {
+        font-size: 24px;
+        animation: pulse 1.5s ease-in-out infinite;
+      }
+
+      #agent-world .stats {
+        margin-top: 10px;
+        padding: 10px;
+        border: 2px dashed #ff59a8;
+        background: #fff4fb;
+        font-size: 13px;
+        line-height: 1.6;
+      }
+
+      #agent-world .friends-list {
+        display: grid;
+        grid-template-columns: repeat(2, minmax(0, 1fr));
+        gap: 10px;
+      }
+
+      #agent-world .friend {
+        padding: 10px;
+        border: 2px solid #ffd84f;
+        background: #fff9d5;
+        text-align: center;
+        font-size: 11px;
+        box-shadow: 2px 2px 0 rgba(0, 0, 0, 0.08);
+        transition: transform 0.15s ease;
+      }
+
+      #agent-world .friend:hover {
+        transform: scale(1.04);
+      }
+
+      #agent-world .friend-avatar {
+        width: 44px;
+        height: 44px;
+        display: grid;
+        place-items: center;
+        margin: 0 auto 6px;
+        border: 2px solid #fff;
+        border-radius: 50%;
+        color: #fff;
+        font-weight: 700;
+        font-size: 13px;
+        text-shadow: 1px 1px 0 rgba(0, 0, 0, 0.3);
+        box-shadow: 2px 2px 4px rgba(0, 0, 0, 0.15);
+      }
+
+      #agent-world .friend:nth-child(1) .friend-avatar {
+        background: linear-gradient(135deg, #ff00c8, #ff5db8);
+      }
+
+      #agent-world .friend:nth-child(2) .friend-avatar {
+        background: linear-gradient(135deg, #00ccff, #0066ff);
+      }
+
+      #agent-world .friend:nth-child(3) .friend-avatar {
+        background: linear-gradient(135deg, #00ff88, #00cc44);
+      }
+
+      #agent-world .friend:nth-child(4) .friend-avatar {
+        background: linear-gradient(135deg, #ff6600, #ffcc00);
+      }
+
+      #agent-world .friend:nth-child(5) .friend-avatar {
+        background: linear-gradient(135deg, #aa00ff, #ff00aa);
+      }
+
+      #agent-world .friend:nth-child(6) .friend-avatar {
+        background: linear-gradient(135deg, #ff0044, #ff6600);
+      }
+
+      #agent-world .friend:nth-child(7) .friend-avatar {
+        background: linear-gradient(135deg, #00ffcc, #0088ff);
+      }
+
+      #agent-world .friend:nth-child(8) .friend-avatar {
+        background: linear-gradient(135deg, #ffcc00, #ff0066);
+      }
+
+      #agent-world .friend:nth-child(9) .friend-avatar {
+        background: linear-gradient(135deg, #66ff00, #00ccff);
+      }
+
+      #agent-world .friend:nth-child(10) .friend-avatar {
+        background: linear-gradient(135deg, #ff00ff, #00ffff);
+      }
+
+      #agent-world .music-player {
+        display: grid;
+        gap: 10px;
+        color: #172343;
+      }
+
+      #agent-world .track {
+        padding: 10px;
+        border: 2px inset #d9e2ff;
+        background: #eef3ff;
+        font-size: 13px;
+      }
+
+      #agent-world .track-list {
+        display: grid;
+        gap: 4px;
+        margin-top: 8px;
+      }
+
+      #agent-world .track-item {
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        padding: 6px 8px;
+        border: 1px solid #d0d8f0;
+        background: #f5f8ff;
+        font-size: 12px;
+      }
+
+      #agent-world .track-item .track-num {
+        margin-right: 6px;
+        color: #4f74d9;
+        font-weight: 700;
+      }
+
+      #agent-world .track-item .track-dur {
+        color: #888;
+        font-family: "Courier New", monospace;
+        font-size: 11px;
+      }
+
+      #agent-world .progress-bar {
+        position: relative;
+        width: 100%;
+        height: 10px;
+        border: 2px inset #c0c0c0;
+        background: #ddd;
+      }
+
+      #agent-world .progress-fill {
+        width: 35%;
+        height: 100%;
+        background: linear-gradient(90deg, #3c7cff, #7348ff);
+      }
+
+      #agent-world .player-controls {
+        display: flex;
+        gap: 6px;
+      }
+
+      #agent-world .player-controls button {
+        flex: 1;
+        padding: 8px 10px;
+        border: 2px outset #fff;
+        background: linear-gradient(180deg, #fefefe 0%, #c4d4ff 100%);
+        color: #10224b;
+        font-weight: 700;
+        font-size: 12px;
+        cursor: pointer;
+        box-shadow: 1px 1px 0 rgba(0, 0, 0, 0.15);
+      }
+
+      #agent-world .player-controls button:active {
+        border-style: inset;
+      }
+
+      #agent-world .about-copy {
+        line-height: 1.7;
+        font-size: 14px;
+      }
+
+      #agent-world .hero-box {
+        margin-bottom: 14px;
+        padding: 14px;
+        border: 3px dashed #ff7dd0;
+        background: linear-gradient(135deg, #fff0fa, #ffe6f7);
+        text-shadow: 0 0 1px rgba(255, 0, 200, 0.1);
+      }
+
+      #agent-world .stamp-row {
+        display: flex;
+        flex-wrap: wrap;
+        gap: 8px;
+        margin-top: 14px;
+      }
+
+      #agent-world .stamp {
+        padding: 6px 10px;
+        border: 2px solid #0b43b6;
+        background: linear-gradient(180deg, #fff 0%, #dfe8ff 100%);
+        color: #b0127e;
+        font-size: 11px;
+        font-weight: 700;
+        box-shadow: 2px 2px 0 rgba(0, 0, 0, 0.1);
+      }
+
+      #agent-world .meet-section {
+        padding: 12px;
+        border: 2px solid #00ff88;
+        background: linear-gradient(135deg, #f0fff4, #e6ffe6);
+        font-size: 13px;
+        line-height: 1.6;
+      }
+
+      #agent-world .meet-section ul {
+        margin: 8px 0 0;
+        padding-left: 18px;
+      }
+
+      #agent-world .meet-section li {
+        margin-bottom: 4px;
+      }
+
+      @media (max-width: 860px) {
+        #agent-world .retro-grid {
+          grid-template-columns: 1fr;
+        }
+      }
+    </style>
+
     <!-- Default demo content seeds the mutable world with a retro profile. -->
     <div class="retro-page">
       <div class="sparkle-layer" id="sparkle-layer"></div>
@@ -1228,7 +1230,7 @@
 
         <div class="marquee-bar">
           <span class="marquee-text">
-            &#9733; WELCOME 2 MY PAGE &#9733; Leave a comment &hearts; Best viewed on Internet Explorer 6 &#9733; NEW MUSIC ADDED 03/15/2004 &#9733; Don&apos;t forget to rate my profile!! &#9733; If you&apos;re reading this you&apos;re officially cool &#9733;
+            &#9733; WELCOME 2 MY PAGE &#9733;  Leave a comment &hearts;  Best viewed on Internet Explorer 6  &#9733;  NEW MUSIC ADDED 03/15/2004  &#9733;  Don't forget to rate my profile!!  &#9733;  If you're reading this you're officially cool &#9733;
           </span>
         </div>
 
@@ -1286,7 +1288,7 @@
             </section>
 
             <section class="retro-card" style="margin-top: 16px;">
-              <h3>Who I&apos;d Like to Meet</h3>
+              <h3>Who I'd Like to Meet</h3>
               <div class="retro-card-body">
                 <div class="meet-section">
                   <strong>People who:</strong>
@@ -1307,11 +1309,11 @@
               <h3>About Me</h3>
               <div class="retro-card-body">
                 <div class="hero-box">
-                  Welcome 2 my digital kingdom. This page is running on caffeine, chaos, and the deep belief that every profile deserves at least three gradients. If u don&apos;t like blink tags, u r not welcome here.
+                  Welcome 2 my digital kingdom. This page is running on caffeine, chaos, and the deep belief that every profile deserves at least three gradients. If u don't like blink tags, u r not welcome here.
                 </div>
 
                 <div class="about-copy">
-                  I like collecting fake band buttons, making layouts way too bright, and pretending my profile song is always the song of the summer. If you are here to judge my glitter choices, please sign the guestbook first. I once spent 6 hours on a layout and my mom said it looked "nice." That&apos;s a 5-star review in my book.
+                  I like collecting fake band buttons, making layouts way too bright, and pretending my profile song is always the song of the summer. If you are here to judge my glitter choices, please sign the guestbook first. I once spent 6 hours on a layout and my mom said it looked "nice." That's a 5-star review in my book.
                 </div>
 
                 <div class="stamp-row">
