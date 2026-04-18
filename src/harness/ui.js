@@ -37,7 +37,7 @@ export function getApiEndpoint(apiEndpointInput) {
 }
 
 export function createSettingsToggle({ apiEndpointInput, modelInput, settingsBody, settingsSummary, settingsChevron }) {
-  return function toggleSettings() {
+  function toggleSettings() {
     if (!settingsBody || !settingsSummary || !settingsChevron) {
       return;
     }
@@ -55,7 +55,19 @@ export function createSettingsToggle({ apiEndpointInput, modelInput, settingsBod
     const isOpen = settingsBody.style.display !== "none";
     settingsBody.style.display = isOpen ? "none" : "grid";
     settingsChevron.textContent = isOpen ? "\u25BE" : "\u25B4";
+  }
+
+  toggleSettings.isOpen = function() {
+    return settingsBody && settingsBody.style.display !== "none";
   };
+
+  toggleSettings.ensureOpen = function() {
+    if (settingsBody && settingsBody.style.display === "none") {
+      toggleSettings();
+    }
+  };
+
+  return toggleSettings;
 }
 
 export function bindEventListeners(deps) {
@@ -93,7 +105,7 @@ export function createModelInputHandler(modelBadge, modelInput) {
   };
 }
 
-export function createPromptSubmitHandler({ state, promptInput, logger, agentLoop }) {
+export function createPromptSubmitHandler({ state, promptInput, logger, agentLoop, getApiKey, settingsToggle }) {
   return async function handleSubmitClick() {
     if (state.isRunning) {
       logger.addLogEntry("error", "Agent is already running.", { label: "state" });
@@ -104,6 +116,12 @@ export function createPromptSubmitHandler({ state, promptInput, logger, agentLoo
 
     if (!prompt) {
       logger.addLogEntry("error", "Prompt is required.", { label: "validation" });
+      return;
+    }
+
+    if (!getApiKey()) {
+      settingsToggle.ensureOpen();
+      logger.addLogEntry("error", "API Key is required. Please enter your API key in Settings.", { label: "validation" });
       return;
     }
 
@@ -145,7 +163,29 @@ export function createPromptKeydownHandler(submitButton) {
 }
 
 export function createMobileNavHandler({ agentControl, agentWorld, mobileNav }) {
-  if (!mobileNav) return function() {};
+  if (!mobileNav || !agentControl || !agentWorld) return function() {};
+
+  function applyMobileView(targetId) {
+    mobileNav.querySelectorAll(".mobile-nav-tab").forEach(function(t) {
+      t.classList.toggle("active", t.dataset.target === targetId);
+    });
+    agentControl.classList.toggle("mobile-hidden", targetId !== "agent-control");
+    agentWorld.classList.toggle("mobile-hidden", targetId !== "agent-world");
+  }
+
+  const mql = window.matchMedia("(max-width: 1023px)");
+  if (mql.matches) {
+    applyMobileView("agent-control");
+  }
+
+  mql.addEventListener("change", function() {
+    if (mql.matches) {
+      applyMobileView("agent-control");
+    } else {
+      agentControl.classList.remove("mobile-hidden");
+      agentWorld.classList.remove("mobile-hidden");
+    }
+  });
 
   return function handleMobileNavClick(event) {
     const tab = event.target.closest(".mobile-nav-tab");
@@ -154,12 +194,6 @@ export function createMobileNavHandler({ agentControl, agentWorld, mobileNav }) 
     const targetId = tab.dataset.target;
     if (!targetId) return;
 
-    mobileNav.querySelectorAll(".mobile-nav-tab").forEach(function(t) {
-      t.classList.remove("active");
-    });
-    tab.classList.add("active");
-
-    agentControl.classList.toggle("mobile-hidden", targetId !== "agent-control");
-    agentWorld.classList.toggle("mobile-hidden", targetId !== "agent-world");
+    applyMobileView(targetId);
   };
 }

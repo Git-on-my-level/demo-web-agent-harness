@@ -24,10 +24,6 @@ import {
   getSelectedModel
 } from "./harness/ui.js";
 
-function greetUser(name) {
-  return `Hello, ${name}! Welcome to the Agent Harness.`;
-}
-
 function restoreSettings(refs) {
   const saved = loadSettings();
   if (saved.apiKey) refs.apiKeyInput.value = saved.apiKey;
@@ -80,9 +76,10 @@ export function bootstrapHarness() {
 
   const getModel = () => getSelectedModel(refs.modelInput);
   const getEndpoint = () => getApiEndpoint(refs.apiEndpointInput);
+  const getApiKey = () => refs.apiKeyInput.value.trim();
 
   const llmClient = createLLMClient({
-    getApiKey: () => refs.apiKeyInput.value.trim(),
+    getApiKey,
     getSelectedModel: getModel,
     getApiEndpoint: getEndpoint
   });
@@ -101,11 +98,20 @@ export function bootstrapHarness() {
   });
 
   const handleModelInput = createModelInputHandler(refs.modelBadge, refs.modelInput);
+  const toggleSettings = createSettingsToggle({
+    apiEndpointInput: refs.apiEndpointInput,
+    modelInput: refs.modelInput,
+    settingsBody: refs.settingsBody,
+    settingsSummary: refs.settingsSummary,
+    settingsChevron: refs.settingsChevron
+  });
   const handleSubmitClick = createPromptSubmitHandler({
     state,
     promptInput: refs.promptInput,
     logger,
-    agentLoop
+    agentLoop,
+    getApiKey,
+    settingsToggle: toggleSettings
   });
   const handleStopClick = createStopHandler(agentLoop);
   const handleClearLogClick = createClearLogHandler({
@@ -120,14 +126,6 @@ export function bootstrapHarness() {
     agentControl: refs.agentControl,
     agentWorld: refs.agentWorld,
     mobileNav: refs.mobileNav
-  });
-  const toggleSettings = createSettingsToggle({
-    apiEndpointInput: refs.apiEndpointInput,
-    modelInput: refs.modelInput,
-    settingsToggle: refs.settingsToggle,
-    settingsBody: refs.settingsBody,
-    settingsSummary: refs.settingsSummary,
-    settingsChevron: refs.settingsChevron
   });
 
   bindEventListeners({
@@ -148,6 +146,10 @@ export function bootstrapHarness() {
   });
 
   handleModelInput();
+
+  if (!getApiKey()) {
+    toggleSettings.ensureOpen();
+  }
 
   window.addEventListener("beforeunload", () => {
     if (!state.isRunning) {
