@@ -102,8 +102,7 @@
     @media (max-width: 1023px) {
       body {
         grid-template-columns: 1fr;
-        padding: 0;
-        padding-top: calc(50px + env(safe-area-inset-top, 0px));
+        padding: 12px;
         gap: 0;
       }
 
@@ -111,9 +110,7 @@
         position: static;
         height: auto;
         max-height: none;
-        border-radius: 0;
-        border-left: 0;
-        border-right: 0;
+        border-radius: 20px;
       }
 
       #agent-control.mobile-hidden,
@@ -122,19 +119,17 @@
       }
 
       #agent-world {
-        min-height: calc(100vh - 48px);
-        border-radius: 0;
-        border-left: 0;
-        border-right: 0;
+        min-height: calc(100vh - 40px);
+        border-radius: 20px;
       }
 
-      #mobile-nav {
+      #mobile-toggle {
         display: flex;
       }
     }
 
     @media (min-width: 1024px) {
-      #mobile-nav {
+      #mobile-toggle {
         display: none;
       }
     }
@@ -713,53 +708,65 @@
     }
 
     /* ═══════════════════════════════════════════════════════════
-       MOBILE NAV — segmented control pinned to top of viewport
+       MOBILE TOGGLE — draggable floating orb overlay
        ═══════════════════════════════════════════════════════════ */
-    #mobile-nav {
+    #mobile-toggle {
       position: fixed;
-      top: 0;
-      left: 0;
-      right: 0;
-      z-index: 1000;
-      padding: 8px 12px;
-      padding-top: calc(8px + env(safe-area-inset-top, 0px));
-      background: linear-gradient(180deg, rgba(11, 15, 23, 0.97) 0%, rgba(11, 15, 23, 0.92) 100%);
-      border-bottom: 1px solid var(--line);
-      backdrop-filter: blur(18px);
-      -webkit-backdrop-filter: blur(18px);
-    }
-
-    .mobile-nav-inner {
-      display: grid;
-      grid-template-columns: 1fr 1fr;
-      background: rgba(255, 255, 255, 0.06);
-      border: 1px solid rgba(162, 184, 214, 0.12);
-      border-radius: 10px;
-      padding: 3px;
-      gap: 3px;
-    }
-
-    .mobile-nav-tab {
-      position: relative;
-      display: flex;
+      z-index: 9999;
+      width: 52px;
+      height: 52px;
+      border-radius: 50%;
+      border: 1.5px solid rgba(85, 208, 255, 0.25);
+      background: linear-gradient(135deg, rgba(85, 208, 255, 0.18), rgba(79, 124, 255, 0.18));
+      backdrop-filter: blur(14px);
+      -webkit-backdrop-filter: blur(14px);
+      color: var(--accent);
+      font-size: 18px;
+      cursor: grab;
       align-items: center;
       justify-content: center;
-      gap: 6px;
-      padding: 8px 0;
-      border: 0;
-      border-radius: 8px;
-      background: transparent;
-      color: var(--muted);
-      font-size: 13px;
-      font-weight: 600;
-      letter-spacing: 0.01em;
-      transition: background 0.2s ease, color 0.2s ease, box-shadow 0.2s ease;
+      box-shadow:
+        0 4px 16px rgba(0, 0, 0, 0.35),
+        0 0 0 1px rgba(255, 255, 255, 0.06) inset;
+      padding: 0;
+      touch-action: none;
+      user-select: none;
+      -webkit-user-select: none;
+      transition: box-shadow 0.2s ease, transform 0.15s ease;
     }
 
-    .mobile-nav-tab.active {
-      background: rgba(85, 208, 255, 0.12);
-      color: var(--accent);
-      box-shadow: 0 1px 4px rgba(85, 208, 255, 0.1);
+    #mobile-toggle:active {
+      cursor: grabbing;
+      transform: scale(1.08);
+      box-shadow:
+        0 6px 24px rgba(0, 0, 0, 0.45),
+        0 0 0 1.5px rgba(85, 208, 255, 0.4) inset;
+    }
+
+    #mobile-toggle.dragging {
+      cursor: grabbing;
+      opacity: 0.85;
+    }
+
+    .toggle-label {
+      position: absolute;
+      bottom: -20px;
+      left: 50%;
+      transform: translateX(-50%);
+      white-space: nowrap;
+      font-size: 9px;
+      font-weight: 700;
+      letter-spacing: 0.06em;
+      text-transform: uppercase;
+      color: var(--muted);
+      opacity: 0;
+      transition: opacity 0.2s ease;
+      pointer-events: none;
+    }
+
+    #mobile-toggle:hover .toggle-label,
+    #mobile-toggle:active .toggle-label {
+      opacity: 1;
     }
 
     @media (max-width: 720px) {
@@ -770,18 +777,6 @@
 
       .control-header-meta {
         justify-content: flex-start;
-      }
-
-      #agent-control {
-        padding: 14px;
-      }
-
-      .input-area {
-        padding: 10px;
-      }
-
-      #prompt-input {
-        min-height: 80px;
       }
     }
   </style>
@@ -860,16 +855,10 @@
        ═══════════════════════════════════════════════════════════ -->
   <div id="agent-world"></div>
 
-  <nav id="mobile-nav">
-    <div class="mobile-nav-inner">
-      <button class="mobile-nav-tab active" data-target="agent-control">
-        <span>&#9881;</span> Control
-      </button>
-      <button class="mobile-nav-tab" data-target="agent-world">
-        <span>&#9733;</span> Preview
-      </button>
-    </div>
-  </nav>
+  <button id="mobile-toggle" type="button">
+    <span id="toggle-icon">&#9733;</span>
+    <span class="toggle-label" id="toggle-label">preview</span>
+  </button>
 
   <script type="module">
     import { bootstrapHarness } from "./src/app.js";
