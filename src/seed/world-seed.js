@@ -1,3 +1,7 @@
+import { DEFAULT_MUSIC_TRACKS, buildMusicPlayerHtml, initializeMusicPlayer } from "./music-player.js";
+
+const musicPlayerMarkup = buildMusicPlayerHtml(DEFAULT_MUSIC_TRACKS);
+
 export const worldSeedHtml = `
   <div class="retro-page">
     <div class="sparkle-layer" id="sparkle-layer"></div>
@@ -108,33 +112,7 @@ export const worldSeedHtml = `
           <section class="retro-card" style="margin-top: 16px;">
             <h3>&#9835; Music Player &#9835;</h3>
             <div class="retro-card-body">
-              <div class="music-player">
-                <div class="track">
-                  <strong>Now Playing:</strong><br>
-                  "Laser Heartbeat (MySpace Cut)" by DJ Away Message
-                </div>
-
-                <div class="progress-bar">
-                  <div class="progress-fill"></div>
-                </div>
-
-                <div class="track-list">
-                  <div class="track-item"><span><span class="track-num">1.</span> Laser Heartbeat</span> <span class="track-dur">3:42</span></div>
-                  <div class="track-item"><span><span class="track-num">2.</span> Glitch Love Anthem</span> <span class="track-dur">4:15</span></div>
-                  <div class="track-item"><span><span class="track-num">3.</span> Neon Midnight Run</span> <span class="track-dur">2:58</span></div>
-                  <div class="track-item"><span><span class="track-num">4.</span> AIM Notification Symphony</span> <span class="track-dur">5:01</span></div>
-                  <div class="track-item"><span><span class="track-num">5.</span> Ctrl+Alt+Del My Heart</span> <span class="track-dur">3:33</span></div>
-                </div>
-
-                <div class="player-controls">
-                  <button type="button">&#9198;</button>
-                  <button type="button">&#9654;</button>
-                  <button type="button">&#10074;&#10074;</button>
-                  <button type="button">&#9197;</button>
-                </div>
-
-                <small style="color: #888; text-align: center;">Audio not included. Vibes absolutely included.</small>
-              </div>
+              ${musicPlayerMarkup}
             </div>
           </section>
         </div>
@@ -172,7 +150,9 @@ export function seedSparkles(agentWorldElement = document.getElementById("agent-
 }
 
 export function initializeWorldSeed(agentWorldElement = document.getElementById("agent-world")) {
+  const musicState = initializeMusicPlayer(agentWorldElement);
   return {
-    sparkleCount: seedSparkles(agentWorldElement)
+    sparkleCount: seedSparkles(agentWorldElement),
+    musicTracks: musicState.ok ? musicState.tracks.length : 0
   };
 }

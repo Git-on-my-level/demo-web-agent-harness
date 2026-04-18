@@ -1,6 +1,7 @@
 import { state, safeJSONStringify } from "./config/state.js";
+import { saveAll } from "./persistence.js";
 
-export function createAgentLoop({ logger, llmClient, toolRunner, submitButton }) {
+export function createAgentLoop({ logger, llmClient, toolRunner, submitButton, agentWorld }) {
   const { callLLM, normalizeAssistantReply, parseToolArguments } = llmClient;
 
   function toolInput(call) {
@@ -141,6 +142,7 @@ export function createAgentLoop({ logger, llmClient, toolRunner, submitButton })
       submitButton.disabled = false;
       submitButton.textContent = "Run Agent";
       submitButton.classList.remove("running");
+      saveAll({ state, agentWorld }) || logger.addLogEntry("error", "Failed to save state — localStorage may be full.", { label: "persistence" });
 
       if (state.interrupted) {
         logger.setStatus("Interrupted", "interrupted");

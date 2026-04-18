@@ -10,6 +10,7 @@ export const SYSTEM_PROMPT = [
   "- Write valid HTML/CSS/JS",
   "- Avoid infinite loops",
   "- You may build tools and UI inside the world",
+  "- Use manage_music_tracks to update or modify the player tracklist when music features are available",
   "Your goal is to iteratively improve the page based on user instructions."
 ].join("\n");
 
@@ -108,6 +109,116 @@ export const TOOL_SCHEMA = [
           }
         },
         required: ["js"],
+        additionalProperties: false
+      }
+    }
+  },
+  {
+    type: "function",
+    function: {
+      name: "manage_music_tracks",
+      description: "Manage the track list used by the Music Player in #agent-world.",
+      parameters: {
+        type: "object",
+        properties: {
+          action: {
+            type: "string",
+            enum: ["set_tracks", "add_track", "update_track", "remove_track", "clear_tracks"],
+            description:
+              "Use set_tracks to replace all tracks, add_track to append one, update_track/remove_track by track_id, clear_tracks to remove all."
+          },
+          tracks: {
+            type: "array",
+            description: "Required for set_tracks: the complete track list.",
+            items: {
+              type: "object",
+              properties: {
+                id: {
+                  type: "string",
+                  description: "Optional explicit track ID."
+                },
+                title: {
+                  type: "string",
+                  description: "Track title."
+                },
+                artist: {
+                  type: "string",
+                  description: "Track artist."
+                },
+                url: {
+                  type: "string",
+                  description: "Public URL for an audio file."
+                },
+                duration: {
+                  type: "string",
+                  description: "Optional display duration (mm:ss)."
+                }
+              },
+              required: ["title", "artist", "url"],
+              additionalProperties: false
+            }
+          },
+          track_id: {
+            type: "string",
+            description: "Required for update_track/remove_track."
+          },
+          track: {
+            type: "object",
+            description: "Track object for add_track.",
+            properties: {
+              id: {
+                type: "string",
+                description: "Optional explicit track ID."
+              },
+              title: {
+                type: "string",
+                description: "Track title."
+              },
+              artist: {
+                type: "string",
+                description: "Track artist."
+              },
+              url: {
+                type: "string",
+                description: "Public URL for an audio file."
+              },
+              duration: {
+                type: "string",
+                description: "Optional display duration."
+              }
+            },
+            required: ["title", "artist", "url"],
+            additionalProperties: false
+          },
+          updates: {
+            type: "object",
+            description: "Update payload for update_track.",
+            properties: {
+              id: {
+                type: "string",
+                description: "New track ID."
+              },
+              title: {
+                type: "string",
+                description: "New track title."
+              },
+              artist: {
+                type: "string",
+                description: "New track artist."
+              },
+              url: {
+                type: "string",
+                description: "New public URL for an audio file."
+              },
+              duration: {
+                type: "string",
+                description: "New display duration."
+              }
+            },
+            additionalProperties: false
+          }
+        },
+        required: ["action"],
         additionalProperties: false
       }
     }

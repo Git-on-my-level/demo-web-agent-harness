@@ -1,4 +1,6 @@
 import { DEFAULT_API_ENDPOINT, DEFAULT_MODEL } from "./config/state.js";
+import { clearAgentState } from "./persistence.js";
+import { initializeWorldSeed } from "../seed/world-seed.js";
 
 export function getDomElements() {
   return {
@@ -13,6 +15,8 @@ export function getDomElements() {
     stopButton: document.getElementById("stop-button"),
     clearLogButton: document.getElementById("clear-log-btn"),
     agentWorld: document.getElementById("agent-world"),
+    agentControl: document.getElementById("agent-control"),
+    mobileNav: document.getElementById("mobile-nav"),
     modelBadge: document.getElementById("model-badge"),
     settingsBody: document.getElementById("settings-body"),
     settingsSummary: document.getElementById("settings-summary"),
@@ -62,12 +66,14 @@ export function bindEventListeners(deps) {
     submitButton,
     stopButton,
     promptInput,
+    mobileNav,
     toggleSettings,
     handleModelInput,
     handleClearLogClick,
     handleSubmitClick,
     handleStopClick,
-    handlePromptKeydown
+    handlePromptKeydown,
+    handleMobileNavClick
   } = deps;
 
   settingsToggle.addEventListener("click", toggleSettings);
@@ -76,6 +82,9 @@ export function bindEventListeners(deps) {
   submitButton.addEventListener("click", handleSubmitClick);
   stopButton.addEventListener("click", handleStopClick);
   promptInput.addEventListener("keydown", handlePromptKeydown);
+  if (mobileNav && handleMobileNavClick) {
+    mobileNav.addEventListener("click", handleMobileNavClick);
+  }
 }
 
 export function createModelInputHandler(modelBadge, modelInput) {
@@ -115,9 +124,14 @@ export function createStopHandler(agentLoop) {
   };
 }
 
-export function createClearLogHandler(outputLog) {
+export function createClearLogHandler({ state, outputLog, agentWorld, logger, worldSeedHtml }) {
   return function handleClearLogClick() {
+    state.conversationHistory = [];
+    clearAgentState();
     outputLog.innerHTML = "";
+    agentWorld.innerHTML = worldSeedHtml.trim();
+    initializeWorldSeed(agentWorld);
+    logger.addLogEntry("status", "Session reset. World restored to seed.", { label: "reset" });
   };
 }
 
@@ -127,5 +141,25 @@ export function createPromptKeydownHandler(submitButton) {
       event.preventDefault();
       submitButton.click();
     }
+  };
+}
+
+export function createMobileNavHandler({ agentControl, agentWorld, mobileNav }) {
+  if (!mobileNav) return function() {};
+
+  return function handleMobileNavClick(event) {
+    const tab = event.target.closest(".mobile-nav-tab");
+    if (!tab) return;
+
+    const targetId = tab.dataset.target;
+    if (!targetId) return;
+
+    mobileNav.querySelectorAll(".mobile-nav-tab").forEach(function(t) {
+      t.classList.remove("active");
+    });
+    tab.classList.add("active");
+
+    agentControl.classList.toggle("mobile-hidden", targetId !== "agent-control");
+    agentWorld.classList.toggle("mobile-hidden", targetId !== "agent-world");
   };
 }

@@ -1,6 +1,8 @@
 import { state } from "./config/state.js";
 import { safeJSONStringify } from "./config/state.js";
 import { validateToolCall } from "./guardrails.js";
+import { manageMusicTracks } from "../seed/music-player.js";
+import { initializeWorldSeed } from "../seed/world-seed.js";
 
 function getWorldStyleElement(agentWorld) {
   let styleElement = agentWorld.querySelector('style[data-agent-style="active"]');
@@ -58,6 +60,7 @@ export function createToolRunner({ agentWorld, logger }) {
         upsertWorldStyle(agentWorld, css);
 
         const jsResult = executeWorldJs(logger, js);
+        initializeWorldSeed(agentWorld);
         return "World replaced. CSS updated. " + jsResult;
       }
 
@@ -126,6 +129,10 @@ export function createToolRunner({ agentWorld, logger }) {
           null,
           2
         );
+      }
+
+      case "manage_music_tracks": {
+        return manageMusicTracks(agentWorld, call.args);
       }
 
       default:

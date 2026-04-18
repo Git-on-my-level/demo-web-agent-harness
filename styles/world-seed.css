@@ -379,32 +379,71 @@
   font-size: 13px;
 }
 
+#agent-world .music-audio {
+  width: 100%;
+}
+
+#agent-world .music-helper {
+  color: #888;
+  text-align: center;
+}
+
 #agent-world .track-list {
   display: grid;
   gap: 4px;
   margin-top: 8px;
 }
 
-#agent-world .track-item {
+#agent-world .music-track-item {
+  width: 100%;
+  text-align: left;
+  font: inherit;
+  color: inherit;
+  background: #f5f8ff;
+  border: 1px solid #d0d8f0;
+  padding: 6px 8px;
   display: flex;
   justify-content: space-between;
   align-items: center;
-  padding: 6px 8px;
-  border: 1px solid #d0d8f0;
-  background: #f5f8ff;
+  gap: 6px;
   font-size: 12px;
+  cursor: pointer;
 }
 
-#agent-world .track-item .track-num {
+#agent-world .music-track-item.is-active {
+  background: #dce5ff;
+  border-color: #8aa2f4;
+}
+
+#agent-world .track-meta {
+  flex: 1;
+  color: #4c5f9f;
+  min-width: 0;
+  overflow: hidden;
+  white-space: nowrap;
+  text-overflow: ellipsis;
+}
+
+#agent-world .music-track-item .track-num {
   margin-right: 6px;
   color: #4f74d9;
   font-weight: 700;
 }
 
-#agent-world .track-item .track-dur {
+#agent-world .music-track-item .track-dur {
   color: #888;
   font-family: "Courier New", monospace;
   font-size: 11px;
+}
+
+#agent-world .track-empty {
+  margin: 0;
+  padding: 10px;
+  border: 1px dashed #d0d8f0;
+  background: #f8faff;
+  color: #58627f;
+  font-size: 12px;
+  text-align: center;
 }
 
 #agent-world .progress-bar {

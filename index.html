@@ -102,6 +102,7 @@
     @media (max-width: 1023px) {
       body {
         grid-template-columns: 1fr;
+        padding: 12px 12px 72px 12px;
       }
 
       #agent-control {
@@ -110,8 +111,23 @@
         max-height: none;
       }
 
+      #agent-control.mobile-hidden,
+      #agent-world.mobile-hidden {
+        display: none;
+      }
+
       #agent-world {
-        min-height: 60vh;
+        min-height: calc(100vh - 120px);
+      }
+
+      #mobile-nav {
+        display: flex;
+      }
+    }
+
+    @media (min-width: 1024px) {
+      #mobile-nav {
+        display: none;
       }
     }
 
@@ -688,6 +704,47 @@
       }
     }
 
+    /* ═══════════════════════════════════════════════════════════
+       MOBILE NAV — bottom tab bar for switching Control / World
+       ═══════════════════════════════════════════════════════════ */
+    #mobile-nav {
+      display: none;
+      position: fixed;
+      bottom: 0;
+      left: 0;
+      right: 0;
+      z-index: 1000;
+      background: linear-gradient(180deg, rgba(18, 24, 35, 0.98), rgba(11, 15, 23, 0.99));
+      border-top: 1px solid var(--line);
+      backdrop-filter: blur(18px);
+      -webkit-backdrop-filter: blur(18px);
+      padding: 8px 12px calc(8px + env(safe-area-inset-bottom, 0px)) 12px;
+      gap: 8px;
+    }
+
+    .mobile-nav-tab {
+      flex: 1;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      gap: 6px;
+      padding: 10px 0;
+      border: 1px solid rgba(162, 184, 214, 0.12);
+      border-radius: 12px;
+      background: rgba(255, 255, 255, 0.03);
+      color: var(--muted);
+      font-size: 13px;
+      font-weight: 700;
+      letter-spacing: 0.02em;
+      transition: background 0.15s ease, color 0.15s ease, border-color 0.15s ease;
+    }
+
+    .mobile-nav-tab.active {
+      background: rgba(85, 208, 255, 0.1);
+      color: var(--accent);
+      border-color: rgba(85, 208, 255, 0.25);
+    }
+
     @media (max-width: 720px) {
       .control-header {
         align-items: flex-start;
@@ -749,7 +806,7 @@
         <h2>Output Log</h2>
         <div class="log-panel-header-right">
           <span>Messages, tools, guardrails</span>
-          <button class="clear-log-btn" id="clear-log-btn" type="button">Clear</button>
+          <button class="clear-log-btn" id="clear-log-btn" type="button">Reset</button>
         </div>
       </div>
       <div id="output-log" aria-live="polite"></div>
@@ -772,7 +829,12 @@
   <!-- ═══════════════════════════════════════════════════════════
        WORLD CONTAINER — the only region the agent is allowed to change
        ═══════════════════════════════════════════════════════════ -->
-  <div id="agent-world"></div>
+  <div id="agent-world" class="mobile-hidden"></div>
+
+  <nav id="mobile-nav">
+    <button class="mobile-nav-tab active" data-target="agent-control">Control</button>
+    <button class="mobile-nav-tab" data-target="agent-world">World</button>
+  </nav>
 
   <script type="module">
     import { bootstrapHarness } from "./src/app.js";
