@@ -1,6 +1,8 @@
 # Demo Web Agent Harness
 
-This repo is a presentation-friendly refactor of the original single-file harness.
+An agent harness that's easy and fun to demo for a live audience! Watch the agent modify a retro style social media page, just like we used to write custom HTML and CSS for our Myspace sites!
+
+Tool calls and agent activity is streamed live on screen. The agent literally modifies the web page that it lives on. If you're really feeling brave you can even ask the agent to modify itself! Try adding a new tool!
 
 ## Structure
 
@@ -22,7 +24,7 @@ This repo is a presentation-friendly refactor of the original single-file harnes
 
 ## Running
 
-Because the harness now uses browser ES modules, serve it over HTTP instead of opening `index.html` directly as a `file://` URL.
+Because the harness uses browser ES modules, serve it over HTTP instead of opening `index.html` directly as a `file://` URL.
 
 ```bash
 cd /Users/dazheng/car-workspace/demo-web-agent-harness
@@ -30,7 +32,3 @@ python3 -m http.server 4173
 ```
 
 Then open `http://localhost:4173`.
-
-## CAR Dogfood Report
-
-This repository was used as a dogfood target for CAR's PMA capabilities during a demo. The work focused on exercising the ticket-driven workflow by applying a small, scoped documentation change in-repo.
