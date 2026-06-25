@@ -68,6 +68,16 @@ if [ "$SYNTAX_ERRORS" -eq 0 ]; then
 fi
 
 echo "------------------"
+if [ -f "test/streaming.test.mjs" ]; then
+  if node test/streaming.test.mjs > /tmp/harness_stream_test.log 2>&1; then
+    ok "Streaming SSE tests pass"
+  else
+    die "Streaming SSE tests failed (see /tmp/harness_stream_test.log)"
+    cat /tmp/harness_stream_test.log
+  fi
+fi
+
+echo "------------------"
 TOTAL=$((PASS + FAIL))
 echo "$PASS/$TOTAL passed"
 

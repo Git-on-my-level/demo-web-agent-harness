@@ -1,8 +1,10 @@
 import { state, safeJSONStringify } from "./config/state.js";
 import { saveAll } from "./persistence.js";
+import { createStreamAccumulator } from "./llm.js";
 
 export function createAgentLoop({ logger, llmClient, toolRunner, submitButton, agentWorld }) {
-  const { callLLM, normalizeAssistantReply, parseToolArguments } = llmClient;
+  const { callLLMStream, parseToolArguments } = llmClient;
+  let currentAbort = null;
 
   function toolInput(call) {
     return {
@@ -15,6 +17,13 @@ export function createAgentLoop({ logger, llmClient, toolRunner, submitButton, a
     };
   }
 
+  function isAbortError(error) {
+    return (
+      state.interrupted ||
+      (error && (error.name === "AbortError" || error.code === 20))
+    );
+  }
+
   async function runAgentLoop() {
     state.interrupted = false;
     state.isRunning = true;
@@ -23,29 +32,59 @@ export function createAgentLoop({ logger, llmClient, toolRunner, submitButton, a
     submitButton.classList.add("running");
     logger.setStatus("Running", "running");
     logger.addLogEntry("status", "Agent loop started.", { label: "status" });
+    currentAbort = new AbortController();
 
     try {
       while (!state.interrupted) {
         logger.showTypingIndicator();
-        const response = await callLLM(state.conversationHistory);
+
+        const accumulator = createStreamAccumulator();
+        let textEntry = null;
+        let streamError = null;
+
+        try {
+          for await (const delta of callLLMStream(state.conversationHistory, { signal: currentAbort.signal })) {
+            if (state.interrupted) {
+              break;
+            }
+            accumulator.addDelta(delta);
+            if (delta.textDelta) {
+              if (!textEntry) {
+                logger.hideTypingIndicator();
+                textEntry = logger.startStreamingEntry({ label: "assistant" });
+              }
+              textEntry.appendText(delta.textDelta);
+            }
+          }
+        } catch (error) {
+          if (isAbortError(error)) {
+            // Graceful stop; loop condition will break below.
+          } else {
+            streamError = error;
+          }
+        }
+
         logger.hideTypingIndicator();
+        if (textEntry) {
+          textEntry.finalize();
+        }
 
         if (state.interrupted) {
           break;
         }
 
-        if (!response.ok) {
-          const errorMessage = response.error || "Unknown API error.";
-          logger.addLogEntry("error", errorMessage, { label: "api error" });
+        if (streamError) {
+          logger.addLogEntry("error", streamError.message || "Unknown API error.", { label: "api error" });
 
-          if (response.rawText) {
-            logger.addLogEntry("assistant", response.rawText, { label: "raw response" });
+          if (streamError.rawText) {
+            logger.addLogEntry("assistant", streamError.rawText, { label: "raw response" });
           }
 
           break;
         }
 
-        const assistantReply = normalizeAssistantReply(response);
+        const assistantReply = accumulator.finalize();
+        const streamedText = !!textEntry;
 
         if (assistantReply.toolCalls.length > 0) {
           const assistantHistoryEntry = {
@@ -58,7 +97,7 @@ export function createAgentLoop({ logger, llmClient, toolRunner, submitButton, a
 
           state.conversationHistory.push(assistantHistoryEntry);
 
-          if (assistantReply.text) {
+          if (assistantReply.text && !streamedText) {
             logger.addLogEntry("assistant", assistantReply.text, { label: "assistant" });
           }
 
@@ -123,7 +162,9 @@ export function createAgentLoop({ logger, llmClient, toolRunner, submitButton, a
         }
 
         if (assistantReply.text) {
-          logger.addLogEntry("assistant", assistantReply.text, { label: "assistant" });
+          if (!streamedText) {
+            logger.addLogEntry("assistant", assistantReply.text, { label: "assistant" });
+          }
           state.conversationHistory.push({
             role: "assistant",
             content: assistantReply.text
@@ -138,6 +179,7 @@ export function createAgentLoop({ logger, llmClient, toolRunner, submitButton, a
       logger.hideTypingIndicator();
       logger.addLogEntry("error", error.message, { label: "runtime error" });
     } finally {
+      currentAbort = null;
       state.isRunning = false;
       submitButton.disabled = false;
       submitButton.textContent = "Run Agent";
@@ -156,6 +198,14 @@ export function createAgentLoop({ logger, llmClient, toolRunner, submitButton, a
 
   function requestStop() {
     state.interrupted = true;
+
+    if (currentAbort) {
+      try {
+        currentAbort.abort();
+      } catch (error) {
+        // ignore — abort is best-effort
+      }
+    }
 
     if (state.isRunning) {
       logger.hideTypingIndicator();

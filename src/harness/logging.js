@@ -210,11 +210,75 @@ export function createLogger({ outputLog, runtimeStatus }) {
     });
   }
 
+  // Creates a live assistant log entry whose text body can be appended to as
+  // tokens stream in. Used by the streaming agent loop to render text deltas in
+  // real time instead of waiting for the full response. Returns a handle with
+  // appendText(delta) and finalize() (currently a no-op placeholder for symmetry).
+  function startStreamingEntry(options = {}) {
+    const label = options.label || "assistant";
+    const kind = options.kind || "assistant";
+
+    const entry = document.createElement("div");
+    entry.className = "log-entry " + kind;
+
+    const topline = document.createElement("div");
+    topline.className = "log-topline";
+
+    const labelEl = document.createElement("div");
+    labelEl.className = "log-kind";
+
+    const icon = document.createElement("span");
+    icon.className = "log-kind-icon";
+    icon.textContent = getKindIcon(label);
+
+    const labelText = document.createElement("span");
+    labelText.textContent = label;
+
+    labelEl.appendChild(icon);
+    labelEl.appendChild(labelText);
+
+    const time = document.createElement("div");
+    time.className = "log-time";
+    time.textContent = timestamp();
+
+    topline.appendChild(labelEl);
+    topline.appendChild(time);
+    entry.appendChild(topline);
+
+    const body = document.createElement("div");
+    body.className = "log-content";
+    entry.appendChild(body);
+
+    appendLogEntry(outputLog, entry);
+
+    function appendText(delta) {
+      if (!delta) {
+        return;
+      }
+      body.textContent += delta;
+      const isNearBottom = outputLog.scrollHeight - outputLog.scrollTop - outputLog.clientHeight < 100;
+      if (isNearBottom) {
+        outputLog.scrollTop = outputLog.scrollHeight;
+      }
+    }
+
+    function finalize() {
+      return entry;
+    }
+
+    return {
+      appendText,
+      finalize,
+      getElement: () => entry
+    };
+  }
+
   return {
     setStatus,
     addLogEntry,
     showTypingIndicator,
     hideTypingIndicator,
+    startStreamingEntry,
     logToolCall,
     logToolResult
   };
